@@ -1,0 +1,14 @@
+{
+  "name": "fundlens-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@8.15.1",
+  "scripts": {
+    "mobile": "pnpm --filter mobile start",
+    "mobile:android": "pnpm --filter mobile android",
+    "mobile:ios": "pnpm --filter mobile ios"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

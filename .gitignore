@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+.env
+.env.local
+.env.*.local
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Node/JS
+node_modules/
+.pnpm-store/
+dist/
+build/
+.next/
+*.tsbuildinfo
+.cache/
+
+# React Native
+apps/mobile/android/
+apps/mobile/ios/
+apps/mobile/.expo/
+apps/mobile/node_modules/
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Alembic
+alembic.ini.local
