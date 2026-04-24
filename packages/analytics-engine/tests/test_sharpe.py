@@ -57,8 +57,8 @@ def test_sharpe_custom_risk_free_rate():
     s_high_rf = sharpe_ratio(returns, risk_free_rate_annual=0.09)
     # Lower risk-free → higher Sharpe (if returns above risk-free)
     if s_low_rf is not None and s_high_rf is not None:
-        # direction depends on return level; just ensure no crash
-        assert s_low_rf >= s_high_rf or True
+        # Just verify no crash; direction depends on actual return level vs risk-free
+        assert math.isfinite(s_low_rf) and math.isfinite(s_high_rf)
 
 
 def test_sharpe_eleven_obs_returns_none():

@@ -75,7 +75,7 @@ export function ExploreScreen() {
               )}
               {mode === "advanced" && item.aum_cr != null && (
                 <Text style={styles.tag}>
-                  AUM ₹{(item.aum_cr / 100).toFixed(0)}Cr
+                  AUM ₹{item.aum_cr.toFixed(0)}Cr
                 </Text>
               )}
             </View>
