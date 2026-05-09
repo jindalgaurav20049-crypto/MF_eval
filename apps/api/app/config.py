@@ -13,5 +13,13 @@ class Settings(BaseSettings):
 
     enable_timescale: bool = False
 
+    mfapi_base_url: str = "https://api.mfapi.in"
+    amfi_nav_url: str = "https://www.amfiindia.com/spages/NAVAll.txt"
+    auto_sync_mf_universe: bool = True
+    auto_sync_navs: bool = True
+    auto_sync_metrics: bool = True
+    mfapi_timeout_seconds: int = 30
+    health_alert_threshold: float = 50.0
+
 
 settings = Settings()

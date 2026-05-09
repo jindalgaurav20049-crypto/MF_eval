@@ -9,7 +9,7 @@ celery_app = Celery(
     "fundlens_worker",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
-    include=["app.tasks.metrics"],
+    include=["app.tasks.metrics", "app.tasks.ingestion"],
 )
 
 celery_app.conf.update(
@@ -24,8 +24,16 @@ celery_app.conf.update(
 )
 
 celery_app.conf.beat_schedule = {
+    "sync-mf-universe-daily": {
+        "task": "app.tasks.ingestion.sync_mf_universe",
+        "schedule": crontab(hour=0, minute=30),
+    },
     "recompute-trailing-metrics-daily": {
         "task": "app.tasks.metrics.recompute_trailing_metrics_daily",
         "schedule": crontab(hour=1, minute=30),  # 1:30 AM IST daily
+    },
+    "watchlist-alerts-hourly": {
+        "task": "app.tasks.metrics.generate_watchlist_alerts",
+        "schedule": crontab(minute=0, hour="*/1"),
     },
 }

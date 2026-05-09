@@ -15,6 +15,7 @@ class AnalysisMode(str, Enum):
 
 # ── Health ────────────────────────────────────────────────────────────────────
 
+
 class HealthResponse(BaseModel):
     status: str
     version: str
@@ -22,6 +23,7 @@ class HealthResponse(BaseModel):
 
 
 # ── Fund Search ───────────────────────────────────────────────────────────────
+
 
 class FundSearchResult(BaseModel):
     scheme_id: str
@@ -42,6 +44,7 @@ class FundSearchResponse(BaseModel):
 
 
 # ── Fund Summary ──────────────────────────────────────────────────────────────
+
 
 class ReturnMetrics(BaseModel):
     period: str
@@ -112,6 +115,7 @@ FundSummaryResponse = BeginnerSummary | AdvancedSummary
 
 # ── Compare ───────────────────────────────────────────────────────────────────
 
+
 class CompareSchemeSlot(BaseModel):
     scheme_id: str
     scheme_name: str
@@ -134,6 +138,7 @@ class CompareResponse(BaseModel):
 
 
 # ── Error ─────────────────────────────────────────────────────────────────────
+
 
 class ErrorResponse(BaseModel):
     detail: str

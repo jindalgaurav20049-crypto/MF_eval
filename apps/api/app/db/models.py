@@ -31,7 +31,9 @@ class AppUser(Base):
     display_name: Mapped[str | None] = mapped_column(String(120))
     analysis_mode: Mapped[str] = mapped_column(String(20), server_default="beginner")
     created_at = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
-    updated_at = mapped_column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 class AMC(Base):
@@ -51,7 +53,9 @@ class Scheme(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     amfi_scheme_code: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
-    amc_id: Mapped[int] = mapped_column(Integer, ForeignKey("amc.id", ondelete="RESTRICT"), nullable=False)
+    amc_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("amc.id", ondelete="RESTRICT"), nullable=False
+    )
     scheme_name: Mapped[str] = mapped_column(String(400), nullable=False)
     sebi_category: Mapped[str | None] = mapped_column(String(100))
     sebi_sub_category: Mapped[str | None] = mapped_column(String(100))
@@ -61,7 +65,9 @@ class Scheme(Base):
     inception_date = mapped_column(Date)
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="true")
     created_at = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
-    updated_at = mapped_column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     amc: Mapped[AMC] = relationship("AMC", back_populates="schemes")
 
@@ -69,9 +75,55 @@ class Scheme(Base):
 class NAVHistoryDaily(Base):
     __tablename__ = "nav_history_daily"
 
-    scheme_id: Mapped[int] = mapped_column(Integer, ForeignKey("scheme.id", ondelete="CASCADE"), primary_key=True)
+    scheme_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("scheme.id", ondelete="CASCADE"), primary_key=True
+    )
     nav_date = mapped_column(Date, primary_key=True)
     nav: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False)
+
+
+class SchemePortfolioSnapshot(Base):
+    __tablename__ = "scheme_portfolio_snapshot"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    scheme_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("scheme.id", ondelete="CASCADE"), nullable=False
+    )
+    snapshot_date = mapped_column(Date, nullable=False)
+    isin: Mapped[str | None] = mapped_column(String(20))
+    instrument_name: Mapped[str | None] = mapped_column(String(400))
+    instrument_type: Mapped[str | None] = mapped_column(String(40))
+    sector: Mapped[str | None] = mapped_column(String(100))
+    weight_pct: Mapped[Decimal | None] = mapped_column(Numeric(8, 4))
+    market_value_cr: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))
+    rating: Mapped[str | None] = mapped_column(String(20))
+
+
+class FundManagerTenure(Base):
+    __tablename__ = "fund_manager_tenure"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    scheme_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("scheme.id", ondelete="CASCADE"), nullable=False
+    )
+    manager_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    start_date = mapped_column(Date, nullable=False)
+    end_date = mapped_column(Date)
+    is_current: Mapped[bool] = mapped_column(Boolean, server_default="true")
+
+
+class SchemeEvent(Base):
+    __tablename__ = "scheme_event"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    scheme_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("scheme.id", ondelete="CASCADE"), nullable=False
+    )
+    event_date = mapped_column(Date, nullable=False)
+    event_type: Mapped[str] = mapped_column(String(60), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    metadata_json: Mapped[str | None] = mapped_column(Text)
+    created_at = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
 
 
 class BenchmarkHistoryDaily(Base):
@@ -89,7 +141,9 @@ class ComputedMetricSnapshot(Base):
     __tablename__ = "computed_metric_snapshot"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    scheme_id: Mapped[int] = mapped_column(Integer, ForeignKey("scheme.id", ondelete="CASCADE"), nullable=False)
+    scheme_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("scheme.id", ondelete="CASCADE"), nullable=False
+    )
     computed_at = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
     period_label: Mapped[str] = mapped_column(String(20), nullable=False)
     cagr_pct: Mapped[Decimal | None] = mapped_column(Numeric(10, 4))
@@ -109,8 +163,12 @@ class UserWatchlist(Base):
     __tablename__ = "user_watchlist"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id = mapped_column(UUID(as_uuid=True), ForeignKey("app_user.id", ondelete="CASCADE"), nullable=False)
-    scheme_id: Mapped[int] = mapped_column(Integer, ForeignKey("scheme.id", ondelete="CASCADE"), nullable=False)
+    user_id = mapped_column(
+        UUID(as_uuid=True), ForeignKey("app_user.id", ondelete="CASCADE"), nullable=False
+    )
+    scheme_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("scheme.id", ondelete="CASCADE"), nullable=False
+    )
     added_at = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
     notes: Mapped[str | None] = mapped_column(Text)
 
@@ -121,11 +179,34 @@ class UserPortfolioTxn(Base):
     __tablename__ = "user_portfolio_txn"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id = mapped_column(UUID(as_uuid=True), ForeignKey("app_user.id", ondelete="CASCADE"), nullable=False)
-    scheme_id: Mapped[int] = mapped_column(Integer, ForeignKey("scheme.id", ondelete="CASCADE"), nullable=False)
+    user_id = mapped_column(
+        UUID(as_uuid=True), ForeignKey("app_user.id", ondelete="CASCADE"), nullable=False
+    )
+    scheme_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("scheme.id", ondelete="CASCADE"), nullable=False
+    )
     txn_date = mapped_column(Date, nullable=False)
     txn_type: Mapped[str] = mapped_column(String(20), nullable=False)
     amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))
     units: Mapped[Decimal | None] = mapped_column(Numeric(18, 4))
     nav_at_txn: Mapped[Decimal | None] = mapped_column(Numeric(18, 4))
     created_at = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
+
+
+class UserNotification(Base):
+    __tablename__ = "user_notification"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id = mapped_column(
+        UUID(as_uuid=True), ForeignKey("app_user.id", ondelete="CASCADE"), nullable=False
+    )
+    scheme_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("scheme.id", ondelete="SET NULL")
+    )
+    notification_type: Mapped[str] = mapped_column(String(40), nullable=False)
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    payload_json: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(20), server_default="queued")
+    created_at = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
+    sent_at = mapped_column(TIMESTAMP(timezone=True))
