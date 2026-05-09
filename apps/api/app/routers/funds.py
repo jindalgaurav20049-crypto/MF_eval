@@ -1,10 +1,17 @@
-"""Fund endpoints — stub implementations returning typed responses."""
+"""Fund endpoints backed by live MF universe data."""
 
 from __future__ import annotations
 
-import structlog
-from fastapi import APIRouter, HTTPException, Query
+from datetime import date
 
+import structlog
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.db.models import FundManagerTenure
+from app.db.session import get_db
+from app.config import settings
 from app.models.schemas import (
     AdvancedSummary,
     AnalysisMode,
@@ -15,81 +22,44 @@ from app.models.schemas import (
     ReturnMetrics,
     RiskMetrics,
 )
+from app.services.funds_service import (
+    compute_and_store_metrics,
+    ensure_mf_universe,
+    ensure_nav_history,
+    fetch_latest_metrics,
+    get_scheme_by_code,
+    search_schemes,
+)
+from app.services.metrics import rolling_returns
 
 router = APIRouter(prefix="/funds", tags=["funds"])
 logger = structlog.get_logger(__name__)
-
-# ── Stub data helpers ─────────────────────────────────────────────────────────
-
-_STUB_FUNDS: list[FundSearchResult] = [
-    FundSearchResult(
-        scheme_id="101206",
-        scheme_name="Axis Bluechip Fund - Direct Plan Growth",
-        amc_name="Axis Mutual Fund",
-        category="Equity",
-        sub_category="Large Cap",
-        plan="Direct",
-        option="Growth",
-        nav=54.32,
-        aum_cr=32500.0,
-    ),
-    FundSearchResult(
-        scheme_id="119598",
-        scheme_name="Mirae Asset Large Cap Fund - Direct Growth",
-        amc_name="Mirae Asset Mutual Fund",
-        category="Equity",
-        sub_category="Large Cap",
-        plan="Direct",
-        option="Growth",
-        nav=102.15,
-        aum_cr=38200.0,
-    ),
-    FundSearchResult(
-        scheme_id="120503",
-        scheme_name="Parag Parikh Flexi Cap Fund - Direct Growth",
-        amc_name="PPFAS Mutual Fund",
-        category="Equity",
-        sub_category="Flexi Cap",
-        plan="Direct",
-        option="Growth",
-        nav=76.88,
-        aum_cr=55000.0,
-    ),
-]
-
-_STUB_HEALTH = FundHealthScore(
-    overall=72.5,
-    returns_consistency=75.0,
-    risk_containment=68.0,
-    risk_adjusted_efficiency=70.0,
-    portfolio_quality=80.0,
-    stability_governance=65.0,
-    cost_efficiency=78.0,
-    confidence="medium",
-)
-
-
-# ── Routes ────────────────────────────────────────────────────────────────────
 
 
 @router.get("/search", response_model=FundSearchResponse)
 async def search_funds(
     q: str = Query(..., min_length=1, description="Search query (scheme name, AMC, category)"),
     limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
 ) -> FundSearchResponse:
     """Search mutual fund schemes by name, AMC, or category."""
     logger.info("fund_search", query=q, limit=limit)
-
-    # Stub: filter from in-memory list for demonstration
-    q_lower = q.lower()
+    ensure_mf_universe(db)
+    matches = search_schemes(db, q, limit)
     results = [
-        f
-        for f in _STUB_FUNDS
-        if q_lower in f.scheme_name.lower()
-        or q_lower in f.amc_name.lower()
-        or q_lower in f.category.lower()
-    ][:limit]
-
+        FundSearchResult(
+            scheme_id=scheme.amfi_scheme_code,
+            scheme_name=scheme.scheme_name,
+            amc_name=amc.name,
+            category=scheme.sebi_category or "Uncategorized",
+            sub_category=scheme.sebi_sub_category or "Unspecified",
+            plan=scheme.plan or "Regular",
+            option=scheme.option or "Growth",
+            nav=float(nav) if nav is not None else None,
+            aum_cr=None,
+        )
+        for scheme, amc, nav in matches
+    ]
     return FundSearchResponse(query=q, total=len(results), results=results)
 
 
@@ -97,6 +67,7 @@ async def search_funds(
 async def get_fund_summary(
     scheme_id: str,
     mode: AnalysisMode = Query(AnalysisMode.BEGINNER, description="Analysis mode: beginner | advanced"),
+    db: Session = Depends(get_db),
 ) -> BeginnerSummary | AdvancedSummary:
     """
     Return fund summary. Mode controls verbosity and metric depth.
@@ -105,52 +76,158 @@ async def get_fund_summary(
     - **advanced**: full metric matrix, all windows, risk-adjusted ratios
     """
     logger.info("fund_summary_requested", scheme_id=scheme_id, mode=mode)
-
-    # Stub: find fund or 404
-    fund = next((f for f in _STUB_FUNDS if f.scheme_id == scheme_id), None)
-    if fund is None:
+    ensure_mf_universe(db)
+    scheme = get_scheme_by_code(db, scheme_id)
+    if scheme is None:
         raise HTTPException(status_code=404, detail=f"Scheme '{scheme_id}' not found")
+    history = ensure_nav_history(db, scheme)
+    metrics, risk_snapshot, health_score = fetch_latest_metrics(db, scheme)
+    if not metrics and settings.auto_sync_metrics:
+        metrics, risk_snapshot, health_score = compute_and_store_metrics(db, scheme, history)
+
+    manager_name, tenure_years = _current_manager(db, scheme.id)
+    fund_health = FundHealthScore(
+        overall=health_score,
+        returns_consistency=_score_band(health_score, 0.9),
+        risk_containment=_score_band(health_score, 0.8),
+        risk_adjusted_efficiency=_score_band(health_score, 0.85),
+        portfolio_quality=None,
+        stability_governance=None,
+        cost_efficiency=None,
+        confidence=_confidence_from_score(health_score),
+    )
 
     if mode == AnalysisMode.BEGINNER:
+        three_year = _metric_for_period(metrics, "3Y")
         return BeginnerSummary(
-            scheme_id=scheme_id,
-            scheme_name=fund.scheme_name,
+            scheme_id=scheme.amfi_scheme_code,
+            scheme_name=scheme.scheme_name,
             mode=AnalysisMode.BEGINNER,
-            fund_health_score=_STUB_HEALTH,
-            yearly_growth_rate_3y=12.4,
-            did_it_beat_index_3y=True,
-            risk_level="Moderately High",
-            expense_ratio_pct=0.45,
-            fund_age_years=9.5,
-            verdict="Strong",
-            sip_note="Suitable for long-term wealth creation (5+ years horizon)",
+            fund_health_score=fund_health,
+            yearly_growth_rate_3y=three_year.cagr_pct if three_year else None,
+            did_it_beat_index_3y=None,
+            risk_level=_risk_level(risk_snapshot.std_dev_annualized),
+            expense_ratio_pct=None,
+            fund_age_years=_fund_age_years(scheme.inception_date),
+            verdict=_verdict_from_score(health_score),
+            sip_note="Evaluate with a 5+ year horizon; diversify across categories.",
         )
 
-    # Advanced mode
+    ordered_metrics = sorted(
+        metrics,
+        key=lambda metric: {"1Y": 1, "3Y": 2, "5Y": 3}.get(metric.period_label, 99),
+    )
     return AdvancedSummary(
-        scheme_id=scheme_id,
-        scheme_name=fund.scheme_name,
+        scheme_id=scheme.amfi_scheme_code,
+        scheme_name=scheme.scheme_name,
         mode=AnalysisMode.ADVANCED,
-        fund_health_score=_STUB_HEALTH,
+        fund_health_score=fund_health,
         return_metrics=[
-            ReturnMetrics(period="1Y", absolute_return_pct=18.2, vs_benchmark_pct=2.1, category_percentile=28),
-            ReturnMetrics(period="3Y", cagr_pct=12.4, vs_benchmark_pct=1.8, category_percentile=32),
-            ReturnMetrics(period="5Y", cagr_pct=14.1, vs_benchmark_pct=2.5, category_percentile=25),
+            ReturnMetrics(
+                period=metric.period_label,
+                cagr_pct=metric.cagr_pct,
+            )
+            for metric in ordered_metrics
         ],
         risk_metrics=RiskMetrics(
-            std_dev_annualized=14.2,
-            beta=0.93,
-            max_drawdown_pct=-28.5,
-            downside_capture_ratio=88.0,
-            upside_capture_ratio=102.0,
-            sharpe_ratio=0.82,
-            sortino_ratio=1.12,
+            std_dev_annualized=risk_snapshot.std_dev_annualized,
+            beta=None,
+            max_drawdown_pct=risk_snapshot.max_drawdown_pct,
+            downside_capture_ratio=None,
+            upside_capture_ratio=None,
+            sharpe_ratio=risk_snapshot.sharpe_ratio,
+            sortino_ratio=risk_snapshot.sortino_ratio,
         ),
-        expense_ratio_pct=0.45,
-        aum_cr=fund.aum_cr,
-        fund_age_years=9.5,
-        fund_manager="Shreyash Devalkar",
-        manager_tenure_years=7.2,
-        benchmark="Nifty 100 TRI",
-        sebi_category="Large Cap Fund",
+        expense_ratio_pct=None,
+        aum_cr=None,
+        fund_age_years=_fund_age_years(scheme.inception_date),
+        fund_manager=manager_name,
+        manager_tenure_years=tenure_years,
+        benchmark=scheme.benchmark_name,
+        sebi_category=scheme.sebi_category,
     )
+
+
+@router.get("/{scheme_id}/rolling-returns")
+async def get_rolling_returns(
+    scheme_id: str,
+    window_years: int = Query(3, ge=1, le=10, description="Rolling window in years"),
+    db: Session = Depends(get_db),
+) -> dict:
+    ensure_mf_universe(db)
+    scheme = get_scheme_by_code(db, scheme_id)
+    if scheme is None:
+        raise HTTPException(status_code=404, detail=f"Scheme '{scheme_id}' not found")
+    history = ensure_nav_history(db, scheme)
+    series = rolling_returns(history, window_years=window_years)
+    return {
+        "scheme_id": scheme.amfi_scheme_code,
+        "scheme_name": scheme.scheme_name,
+        "window_years": window_years,
+        "points": [
+            {"date": nav_date.isoformat(), "return_pct": value} for nav_date, value in series
+        ],
+    }
+
+
+def _current_manager(db: Session, scheme_id: int) -> tuple[str | None, float | None]:
+    manager = db.execute(
+        select(FundManagerTenure)
+        .where(FundManagerTenure.scheme_id == scheme_id, FundManagerTenure.is_current.is_(True))
+        .order_by(FundManagerTenure.start_date.desc())
+    ).scalars().first()
+    if manager is None:
+        return None, None
+    tenure_years = _fund_age_years(manager.start_date)
+    return manager.manager_name, tenure_years
+
+
+def _metric_for_period(metrics, label: str):
+    for metric in metrics:
+        if metric.period_label == label:
+            return metric
+    return None
+
+
+def _risk_level(std_dev: float | None) -> str | None:
+    if std_dev is None:
+        return None
+    if std_dev < 8:
+        return "Low"
+    if std_dev < 12:
+        return "Moderate"
+    if std_dev < 16:
+        return "Moderately High"
+    return "High"
+
+
+def _fund_age_years(inception: date | None) -> float | None:
+    if inception is None:
+        return None
+    return round((date.today() - inception).days / 365.25, 1)
+
+
+def _verdict_from_score(score: float | None) -> str | None:
+    if score is None:
+        return "Insufficient Data"
+    if score >= 80:
+        return "Strong"
+    if score >= 60:
+        return "Average"
+    return "Weak"
+
+
+def _confidence_from_score(score: float | None) -> str | None:
+    if score is None:
+        return None
+    if score >= 75:
+        return "high"
+    if score >= 55:
+        return "medium"
+    return "low"
+
+
+def _score_band(score: float | None, ratio: float) -> float | None:
+    if score is None:
+        return None
+    return round(score * ratio, 2)

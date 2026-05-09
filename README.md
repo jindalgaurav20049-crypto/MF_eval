@@ -81,6 +81,9 @@ uvicorn app.main:app --reload --port 8000
 API will be available at http://localhost:8000  
 Interactive docs: http://localhost:8000/docs
 
+On first startup the API syncs the full AMFI/MFAPI universe into Postgres automatically.  
+You can disable auto-sync via `AUTO_SYNC_MF_UNIVERSE=false` if needed.
+
 ### 6. Start the Worker
 
 ```bash
@@ -124,6 +127,22 @@ pytest
 | GET | `/funds/search` | Search mutual fund schemes |
 | GET | `/funds/{scheme_id}/summary` | Fund summary (beginner/advanced mode) |
 | GET | `/compare` | Compare multiple funds |
+| GET | `/funds/{scheme_id}/rolling-returns` | Rolling return heatmap series |
+| POST | `/portfolio/import/cas` | Import CAS/portfolio transactions |
+| POST | `/portfolio/holdings/import` | Upload fund holdings snapshot CSV |
+| GET | `/portfolio/{user_id}/overlap` | Portfolio overlap analysis |
+| GET | `/portfolio/{user_id}/tax` | Tax scenario estimates |
+| POST | `/events/manager-changes/import` | Upload fund manager change CSV |
+| POST | `/events/scheme-events/import` | Upload SEBI/regulatory events CSV |
+| GET | `/events/funds/{scheme_id}/manager-changes` | Fund manager change history |
+| GET | `/events/funds/{scheme_id}/regulatory-events` | SEBI/regulatory events |
+| POST | `/watchlist` | Add scheme to watchlist |
+| GET | `/watchlist/{user_id}` | Watchlist entries |
+| GET | `/watchlist/{user_id}/notifications` | Watchlist alerts |
+| GET | `/export/funds/{scheme_id}/summary.pdf` | Export fund summary PDF |
+| GET | `/export/funds/{scheme_id}/summary.xlsx` | Export fund summary Excel |
+| GET | `/export/portfolio/{user_id}.pdf` | Export portfolio PDF |
+| GET | `/export/portfolio/{user_id}.xlsx` | Export portfolio Excel |
 
 ### Example requests
 
@@ -142,6 +161,12 @@ curl "http://localhost:8000/funds/101206/summary?mode=advanced"
 
 # Compare funds
 curl "http://localhost:8000/compare?scheme_ids=101206,119598"
+
+# Rolling returns heatmap series
+curl "http://localhost:8000/funds/101206/rolling-returns?window_years=3"
+
+# Import portfolio (CSV/JSON)
+curl -F "email=user@example.com" -F "file=@cas.csv" http://localhost:8000/portfolio/import/cas
 ```
 
 ## Architecture Notes
