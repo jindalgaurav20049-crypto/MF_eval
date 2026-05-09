@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -70,7 +70,7 @@ def generate_watchlist_alerts(db: Session) -> int:
                 message="A watchlisted fund health score dipped below 50. Consider reviewing.",
                 payload_json=json.dumps({"health_score": float(snapshot.health_score)}),
                 status="queued",
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
             )
             db.add(notification)
             alerts += 1

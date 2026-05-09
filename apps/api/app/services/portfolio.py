@@ -149,6 +149,7 @@ def compute_tax_scenarios(db: Session, user_id: str) -> list[dict]:
         gain = (Decimal(str(latest_nav)) - (txn.nav_at_txn or Decimal("0"))) * (
             txn.units or Decimal("0")
         )
+        # Equity mutual fund tax assumption: 10% LTCG (>= 1 year), 15% STCG (< 1 year).
         tax_rate = Decimal("0.10") if holding_period_days >= 365 else Decimal("0.15")
         results.append(
             {
@@ -189,7 +190,9 @@ def _parse_csv(file_bytes: bytes) -> list[ParsedTransaction]:
     reader = csv.DictReader(stream)
     records: list[ParsedTransaction] = []
     for row in reader:
-        records.append(_parse_row(row))
+        parsed = _parse_row(row)
+        if parsed:
+            records.append(parsed)
     return records
 
 
@@ -197,7 +200,9 @@ def _parse_json(file_bytes: bytes) -> list[ParsedTransaction]:
     payload = json.loads(file_bytes.decode("utf-8", errors="ignore"))
     records: list[ParsedTransaction] = []
     for row in payload:
-        records.append(_parse_row(row))
+        parsed = _parse_row(row)
+        if parsed:
+            records.append(parsed)
     return records
 
 
@@ -219,7 +224,9 @@ def _parse_text(file_bytes: bytes) -> list[ParsedTransaction]:
             "units": parts[5] if len(parts) > 5 else None,
             "nav": parts[6] if len(parts) > 6 else None,
         }
-        records.append(_parse_row(row))
+        parsed = _parse_row(row)
+        if parsed:
+            records.append(parsed)
     return records
 
 
@@ -229,12 +236,16 @@ def _parse_pdf(file_bytes: bytes) -> list[ParsedTransaction]:
     return _parse_text(text.encode("utf-8"))
 
 
-def _parse_row(row: dict[str, Any]) -> ParsedTransaction:
+def _parse_row(row: dict[str, Any]) -> ParsedTransaction | None:
+    txn_type_raw = row.get("txn_type") or row.get("transaction_type")
+    txn_type = str(txn_type_raw).lower() if txn_type_raw else None
+    if txn_type not in {"purchase", "redemption", "switch_in", "switch_out"}:
+        return None
     return ParsedTransaction(
         scheme_code=_clean(row.get("scheme_code") or row.get("schemeCode") or row.get("scheme_id")),
         scheme_name=_clean(row.get("scheme_name") or row.get("schemeName")),
         txn_date=_parse_date(row.get("txn_date") or row.get("date") or row.get("transaction_date")),
-        txn_type=str(row.get("txn_type") or row.get("transaction_type") or "purchase").lower(),
+        txn_type=txn_type,
         amount=_parse_decimal(row.get("amount")),
         units=_parse_decimal(row.get("units")),
         nav_at_txn=_parse_decimal(row.get("nav") or row.get("nav_at_txn")),
@@ -272,7 +283,9 @@ def _clean(value: Any) -> str | None:
     return text or None
 
 
-def _resolve_scheme(db: Session, scheme_code: str | None, scheme_name: str | None) -> Scheme | None:
+def _resolve_scheme(
+    db: Session, scheme_code: str | None, scheme_name: str | None = None
+) -> Scheme | None:
     if scheme_code:
         scheme = db.execute(
             select(Scheme).where(Scheme.amfi_scheme_code == scheme_code)

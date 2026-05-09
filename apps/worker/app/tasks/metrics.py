@@ -1,6 +1,6 @@
 """Metric computation tasks for FundLens worker."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 import math
 import statistics
 
@@ -54,7 +54,7 @@ def recompute_trailing_metrics_daily(self) -> dict:
                 continue
             nav_series = [(row.nav_date, float(row.nav)) for row in nav_rows]
             metrics = _compute_trailing_metrics(nav_series)
-            computed_at = datetime.utcnow()
+            computed_at = datetime.now(timezone.utc)
             for metric in metrics:
                 snapshot = ComputedMetricSnapshot(
                     scheme_id=scheme.id,
@@ -99,12 +99,18 @@ def generate_watchlist_alerts() -> dict:
             if snapshot is None or snapshot.health_score is None:
                 continue
             if float(snapshot.health_score) < 50:
+                scheme = (
+                    db.execute(select(Scheme).where(Scheme.id == entry.scheme_id))
+                    .scalars()
+                    .first()
+                )
+                scheme_name = scheme.scheme_name if scheme else "this fund"
                 notification = UserNotification(
                     user_id=entry.user_id,
                     scheme_id=entry.scheme_id,
                     notification_type="health_drop",
                     title="Fund health dropped",
-                    message="A watchlisted fund health score dipped below 50.",
+                    message=f"Fund {scheme_name} health score dipped below 50.",
                     status="queued",
                 )
                 db.add(notification)
@@ -195,6 +201,12 @@ def _sortino_ratio(returns: list[float], target_return: float = 0.0) -> float | 
 
 
 def _compute_health_score(cagr_pct: float, drawdown_pct: float, sharpe_value: float | None) -> float:
+    """Score health on a 0-80 scale using returns, drawdown, and Sharpe.
+
+    The score caps returns between -10% and 30% (max 30 pts), drawdowns reward
+    lower absolute drawdown up to 30 pts, and Sharpe contributes up to 20 pts.
+    These weights bias toward consistent long-term returns with controlled drawdown.
+    """
     return_score = min(max(cagr_pct, -10), 30)
     drawdown_score = max(0.0, 30 - abs(drawdown_pct))
     sharpe_score = min(max((sharpe_value or 0) * 20, 0), 20)

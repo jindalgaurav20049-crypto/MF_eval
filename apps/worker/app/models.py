@@ -17,6 +17,7 @@ class Scheme(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     amfi_scheme_code: Mapped[str] = mapped_column(String(20))
+    scheme_name: Mapped[str] = mapped_column(String(400))
 
 
 class NAVHistoryDaily(Base):

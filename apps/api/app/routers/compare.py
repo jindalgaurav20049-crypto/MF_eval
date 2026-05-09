@@ -20,6 +20,7 @@ from app.services.funds_service import (
     fetch_latest_metrics,
     get_scheme_by_code,
 )
+from app.services.metrics import metric_for_period
 
 router = APIRouter(prefix="/compare", tags=["compare"])
 logger = structlog.get_logger(__name__)
@@ -45,9 +46,9 @@ async def compare_funds(
         metrics, risk_snapshot, health_score = fetch_latest_metrics(db, scheme)
         if not metrics and settings.auto_sync_metrics:
             metrics, risk_snapshot, health_score = compute_and_store_metrics(db, scheme, history)
-        one_year = _metric_for_period(metrics, "1Y")
-        three_year = _metric_for_period(metrics, "3Y")
-        five_year = _metric_for_period(metrics, "5Y")
+        one_year = metric_for_period(metrics, "1Y")
+        three_year = metric_for_period(metrics, "3Y")
+        five_year = metric_for_period(metrics, "5Y")
         latest_nav = history[-1][1] if history else None
         slots.append(
             CompareSchemeSlot(
@@ -72,10 +73,3 @@ async def compare_funds(
         slots = slots[:2]
 
     return CompareResponse(mode=mode, schemes=slots, note=note)
-
-
-def _metric_for_period(metrics, label: str):
-    for metric in metrics:
-        if metric.period_label == label:
-            return metric
-    return None

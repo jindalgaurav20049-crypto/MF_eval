@@ -9,6 +9,13 @@ from analytics_engine.calculators.cagr import cagr_from_nav_series
 from analytics_engine.calculators.drawdown import max_drawdown
 from analytics_engine.calculators.sharpe import sharpe_ratio
 
+HEALTH_SCORE_WEIGHTS = {
+    "1Y": 0.25,
+    "3Y": 0.35,
+    "5Y": 0.4,
+}
+"""Weighting for health score by period (longer windows get more weight)."""
+
 
 @dataclass(frozen=True)
 class TrailingMetric:
@@ -26,6 +33,13 @@ class RiskSnapshot:
     sharpe_ratio: float | None
     sortino_ratio: float | None
     max_drawdown_pct: float | None
+
+
+def metric_for_period(metrics: list[TrailingMetric], label: str) -> TrailingMetric | None:
+    for metric in metrics:
+        if metric.period_label == label:
+            return metric
+    return None
 
 
 def compute_trailing_metrics(nav_series: list[tuple[date, float]]) -> list[TrailingMetric]:
@@ -99,7 +113,7 @@ def compute_fund_health(metrics: list[TrailingMetric]) -> float | None:
     score = 0.0
     weights = 0.0
     for metric in available:
-        weight = {"1Y": 0.25, "3Y": 0.35, "5Y": 0.4}.get(metric.period_label, 0.2)
+        weight = HEALTH_SCORE_WEIGHTS.get(metric.period_label, 0.2)
         return_score = min(max(metric.cagr_pct or 0, -10), 30)
         drawdown_score = 0.0
         if metric.max_drawdown_pct is not None:

@@ -110,7 +110,9 @@ def _parse_date(value: Any) -> date | None:
 def _parse_bool(value: Any) -> bool:
     if isinstance(value, bool):
         return value
+    if value is None:
+        return False
     text = str(value).strip().lower()
-    if text in {"false", "0", "no", "n"}:
+    if text in {"", "false", "0", "no", "n"}:
         return False
     return True

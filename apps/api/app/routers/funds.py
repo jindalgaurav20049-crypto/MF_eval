@@ -30,7 +30,7 @@ from app.services.funds_service import (
     get_scheme_by_code,
     search_schemes,
 )
-from app.services.metrics import rolling_returns
+from app.services.metrics import metric_for_period, rolling_returns
 
 router = APIRouter(prefix="/funds", tags=["funds"])
 logger = structlog.get_logger(__name__)
@@ -100,7 +100,7 @@ async def get_fund_summary(
     )
 
     if mode == AnalysisMode.BEGINNER:
-        three_year = _metric_for_period(metrics, "3Y")
+        three_year = metric_for_period(metrics, "3Y")
         return BeginnerSummary(
             scheme_id=scheme.amfi_scheme_code,
             scheme_name=scheme.scheme_name,
@@ -186,13 +186,6 @@ def _current_manager(db: Session, scheme_id: int) -> tuple[str | None, float | N
         return None, None
     tenure_years = _fund_age_years(manager.start_date)
     return manager.manager_name, tenure_years
-
-
-def _metric_for_period(metrics, label: str):
-    for metric in metrics:
-        if metric.period_label == label:
-            return metric
-    return None
 
 
 def _risk_level(std_dev: float | None) -> str | None:
