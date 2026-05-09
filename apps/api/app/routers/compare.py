@@ -6,8 +6,8 @@ import structlog
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.db.session import get_db
 from app.config import settings
+from app.db.session import get_db
 from app.models.schemas import (
     AnalysisMode,
     CompareResponse,

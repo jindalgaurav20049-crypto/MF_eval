@@ -7,7 +7,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.db.models import AMC, NAVHistoryDaily, ComputedMetricSnapshot, Scheme
+from app.db.models import AMC, ComputedMetricSnapshot, NAVHistoryDaily, Scheme
 from app.services.ingestion import SyncResult, sync_mf_universe, update_scheme_from_detail
 from app.services.metrics import (
     RiskSnapshot,
@@ -59,16 +59,18 @@ def search_schemes(db: Session, query: str, limit: int) -> list[tuple[Scheme, AM
 
 
 def get_scheme_by_code(db: Session, scheme_code: str) -> Scheme | None:
-    return db.execute(select(Scheme).where(Scheme.amfi_scheme_code == scheme_code)).scalar_one_or_none()
+    return db.execute(
+        select(Scheme).where(Scheme.amfi_scheme_code == scheme_code)
+    ).scalar_one_or_none()
 
 
 def ensure_nav_history(db: Session, scheme: Scheme) -> list[tuple[date, float]]:
     history = [
         (row.nav_date, float(row.nav))
         for row in db.execute(
-            select(NAVHistoryDaily).where(NAVHistoryDaily.scheme_id == scheme.id).order_by(
-                NAVHistoryDaily.nav_date.asc()
-            )
+            select(NAVHistoryDaily)
+            .where(NAVHistoryDaily.scheme_id == scheme.id)
+            .order_by(NAVHistoryDaily.nav_date.asc())
         ).scalars()
     ]
     if history:
@@ -143,8 +145,12 @@ def fetch_latest_metrics(
             std_dev_annualized=float(snapshot.std_dev_annualized)
             if snapshot.std_dev_annualized is not None
             else None,
-            sharpe_ratio=float(snapshot.sharpe_ratio) if snapshot.sharpe_ratio is not None else None,
-            sortino_ratio=float(snapshot.sortino_ratio) if snapshot.sortino_ratio is not None else None,
+            sharpe_ratio=float(snapshot.sharpe_ratio)
+            if snapshot.sharpe_ratio is not None
+            else None,
+            sortino_ratio=float(snapshot.sortino_ratio)
+            if snapshot.sortino_ratio is not None
+            else None,
             max_drawdown_pct=float(snapshot.max_drawdown_pct)
             if snapshot.max_drawdown_pct is not None
             else None,

@@ -1,19 +1,25 @@
 from __future__ import annotations
 
 import csv
+import io
+import json
+import uuid
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
-import io
-import json
 from typing import Any
-import uuid
 
+from pypdf import PdfReader
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import AppUser, NAVHistoryDaily, Scheme, SchemePortfolioSnapshot, UserPortfolioTxn
-from pypdf import PdfReader
+from app.db.models import (
+    AppUser,
+    NAVHistoryDaily,
+    Scheme,
+    SchemePortfolioSnapshot,
+    UserPortfolioTxn,
+)
 
 
 @dataclass(frozen=True)
@@ -106,7 +112,12 @@ def compute_portfolio_overlap(db: Session, user_id: str) -> list[dict]:
             continue
         entry = holdings.setdefault(
             key,
-            {"instrument": snapshot.instrument_name, "isin": snapshot.isin, "funds": set(), "weight": 0.0},
+            {
+                "instrument": snapshot.instrument_name,
+                "isin": snapshot.isin,
+                "funds": set(),
+                "weight": 0.0,
+            },
         )
         entry["funds"].add(snapshot.scheme_id)
         entry["weight"] += float(snapshot.weight_pct or 0)

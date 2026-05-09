@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
 import json
+from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -31,9 +31,7 @@ def add_to_watchlist(db: Session, email: str, scheme_code: str) -> UserWatchlist
 
 
 def list_watchlist(db: Session, user_id: str) -> list[UserWatchlist]:
-    return (
-        db.execute(select(UserWatchlist).where(UserWatchlist.user_id == user_id)).scalars().all()
-    )
+    return db.execute(select(UserWatchlist).where(UserWatchlist.user_id == user_id)).scalars().all()
 
 
 def list_notifications(db: Session, user_id: str) -> list[UserNotification]:

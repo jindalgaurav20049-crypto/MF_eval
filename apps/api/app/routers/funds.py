@@ -9,9 +9,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.db.models import FundManagerTenure
 from app.db.session import get_db
-from app.config import settings
 from app.models.schemas import (
     AdvancedSummary,
     AnalysisMode,
@@ -66,7 +66,9 @@ async def search_funds(
 @router.get("/{scheme_id}/summary")
 async def get_fund_summary(
     scheme_id: str,
-    mode: AnalysisMode = Query(AnalysisMode.BEGINNER, description="Analysis mode: beginner | advanced"),
+    mode: AnalysisMode = Query(
+        AnalysisMode.BEGINNER, description="Analysis mode: beginner | advanced"
+    ),
     db: Session = Depends(get_db),
 ) -> BeginnerSummary | AdvancedSummary:
     """
@@ -171,11 +173,15 @@ async def get_rolling_returns(
 
 
 def _current_manager(db: Session, scheme_id: int) -> tuple[str | None, float | None]:
-    manager = db.execute(
-        select(FundManagerTenure)
-        .where(FundManagerTenure.scheme_id == scheme_id, FundManagerTenure.is_current.is_(True))
-        .order_by(FundManagerTenure.start_date.desc())
-    ).scalars().first()
+    manager = (
+        db.execute(
+            select(FundManagerTenure)
+            .where(FundManagerTenure.scheme_id == scheme_id, FundManagerTenure.is_current.is_(True))
+            .order_by(FundManagerTenure.start_date.desc())
+        )
+        .scalars()
+        .first()
+    )
     if manager is None:
         return None, None
     tenure_years = _fund_age_years(manager.start_date)

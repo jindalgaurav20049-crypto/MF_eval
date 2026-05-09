@@ -28,7 +28,12 @@ def upgrade() -> None:
         sa.Column("message", sa.Text(), nullable=False),
         sa.Column("payload_json", sa.Text(), nullable=True),
         sa.Column("status", sa.String(20), server_default="queued", nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("sent_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(["scheme_id"], ["scheme.id"], ondelete="SET NULL"),
         sa.ForeignKeyConstraint(["user_id"], ["app_user.id"], ondelete="CASCADE"),

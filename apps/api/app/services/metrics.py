@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import date
 import math
 import statistics
+from dataclasses import dataclass
+from datetime import date
 
 from analytics_engine.calculators.cagr import cagr_from_nav_series
 from analytics_engine.calculators.drawdown import max_drawdown
@@ -113,7 +113,9 @@ def compute_fund_health(metrics: list[TrailingMetric]) -> float | None:
     return _round(score / weights) if weights else None
 
 
-def rolling_returns(nav_series: list[tuple[date, float]], window_years: int) -> list[tuple[date, float]]:
+def rolling_returns(
+    nav_series: list[tuple[date, float]], window_years: int
+) -> list[tuple[date, float]]:
     if len(nav_series) < 2:
         return []
     nav_series = sorted(nav_series, key=lambda row: row[0])

@@ -5,6 +5,7 @@ Revises:
 Create Date: 2024-01-01 00:00:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -31,8 +32,18 @@ def upgrade() -> None:
         sa.Column("email", sa.String(320), nullable=False),
         sa.Column("display_name", sa.String(120), nullable=True),
         sa.Column("analysis_mode", sa.String(20), server_default="beginner", nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
     )
@@ -45,7 +56,12 @@ def upgrade() -> None:
         sa.Column("amfi_code", sa.String(20), nullable=False),
         sa.Column("name", sa.String(200), nullable=False),
         sa.Column("short_name", sa.String(60), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("amfi_code"),
     )
@@ -60,13 +76,23 @@ def upgrade() -> None:
         sa.Column("scheme_name", sa.String(400), nullable=False),
         sa.Column("sebi_category", sa.String(100), nullable=True),
         sa.Column("sebi_sub_category", sa.String(100), nullable=True),
-        sa.Column("plan", sa.String(30), nullable=True),   # Direct | Regular
+        sa.Column("plan", sa.String(30), nullable=True),  # Direct | Regular
         sa.Column("option", sa.String(30), nullable=True),  # Growth | IDCW
         sa.Column("benchmark_name", sa.String(200), nullable=True),
         sa.Column("inception_date", sa.Date(), nullable=True),
         sa.Column("is_active", sa.Boolean(), server_default=sa.text("true"), nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["amc_id"], ["amc.id"], ondelete="RESTRICT"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("amfi_scheme_code"),
@@ -96,7 +122,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("index_name", "index_date"),
     )
-    op.create_index("ix_benchmark_index_date", "benchmark_history_daily", ["index_name", "index_date"])
+    op.create_index(
+        "ix_benchmark_index_date", "benchmark_history_daily", ["index_name", "index_date"]
+    )
 
     # ── scheme_portfolio_snapshot ─────────────────────────────────────────────
     op.create_table(
@@ -140,10 +168,17 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("scheme_id", sa.Integer(), nullable=False),
         sa.Column("event_date", sa.Date(), nullable=False),
-        sa.Column("event_type", sa.String(60), nullable=False),  # manager_change | category_change | merger | sebi_directive
+        sa.Column(
+            "event_type", sa.String(60), nullable=False
+        ),  # manager_change | category_change | merger | sebi_directive
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("metadata_json", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["scheme_id"], ["scheme.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -154,7 +189,12 @@ def upgrade() -> None:
         "computed_metric_snapshot",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("scheme_id", sa.Integer(), nullable=False),
-        sa.Column("computed_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "computed_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("period_label", sa.String(20), nullable=False),  # 1Y, 3Y, 5Y, etc.
         sa.Column("cagr_pct", sa.Numeric(10, 4), nullable=True),
         sa.Column("std_dev_annualized", sa.Numeric(10, 4), nullable=True),
@@ -171,7 +211,11 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("scheme_id", "period_label", "computed_at"),
     )
-    op.create_index("ix_computed_metric_scheme_period", "computed_metric_snapshot", ["scheme_id", "period_label"])
+    op.create_index(
+        "ix_computed_metric_scheme_period",
+        "computed_metric_snapshot",
+        ["scheme_id", "period_label"],
+    )
 
     # ── user_watchlist ────────────────────────────────────────────────────────
     op.create_table(
@@ -179,7 +223,9 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column("scheme_id", sa.Integer(), nullable=False),
-        sa.Column("added_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "added_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False
+        ),
         sa.Column("notes", sa.Text(), nullable=True),
         sa.ForeignKeyConstraint(["user_id"], ["app_user.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["scheme_id"], ["scheme.id"], ondelete="CASCADE"),
@@ -195,11 +241,18 @@ def upgrade() -> None:
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column("scheme_id", sa.Integer(), nullable=False),
         sa.Column("txn_date", sa.Date(), nullable=False),
-        sa.Column("txn_type", sa.String(20), nullable=False),  # purchase | redemption | switch_in | switch_out
+        sa.Column(
+            "txn_type", sa.String(20), nullable=False
+        ),  # purchase | redemption | switch_in | switch_out
         sa.Column("amount", sa.Numeric(18, 2), nullable=True),
         sa.Column("units", sa.Numeric(18, 4), nullable=True),
         sa.Column("nav_at_txn", sa.Numeric(18, 4), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["user_id"], ["app_user.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["scheme_id"], ["scheme.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),

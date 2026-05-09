@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import json
+import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-import json
-import re
 
 from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
@@ -96,7 +96,9 @@ def sync_mf_universe(db: Session, client: MFAPIClient | None = None) -> SyncResu
     if nav_entries:
         scheme_ids = {
             scheme.amfi_scheme_code: scheme.id
-            for scheme in db.execute(select(Scheme).where(Scheme.amfi_scheme_code.in_(nav_map.keys()))).scalars()
+            for scheme in db.execute(
+                select(Scheme).where(Scheme.amfi_scheme_code.in_(nav_map.keys()))
+            ).scalars()
         }
         nav_rows_added = _upsert_nav_entries(db, nav_entries, scheme_ids)
 
@@ -114,7 +116,11 @@ def update_scheme_from_detail(db: Session, scheme: Scheme, detail: SchemeDetail)
         amc_code = slugify(detail.fund_house)
         amc = db.execute(select(AMC).where(AMC.amfi_code == amc_code)).scalar_one_or_none()
         if amc is None:
-            amc = AMC(amfi_code=amc_code, name=detail.fund_house, short_name=_short_name(detail.fund_house))
+            amc = AMC(
+                amfi_code=amc_code,
+                name=detail.fund_house,
+                short_name=_short_name(detail.fund_house),
+            )
             db.add(amc)
             db.flush()
         scheme.amc_id = amc.id
@@ -178,8 +184,10 @@ def _merge_scheme_sources(
 
 def _insert_nav_rows(db: Session, rows: list[dict]) -> int:
     if db.bind and db.bind.dialect.name == "postgresql":
-        stmt = insert(NAVHistoryDaily).values(rows).on_conflict_do_nothing(
-            index_elements=["scheme_id", "nav_date"]
+        stmt = (
+            insert(NAVHistoryDaily)
+            .values(rows)
+            .on_conflict_do_nothing(index_elements=["scheme_id", "nav_date"])
         )
         result = db.execute(stmt)
         db.commit()

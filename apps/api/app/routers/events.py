@@ -5,7 +5,12 @@ from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.services.events import import_manager_changes, import_scheme_events, list_manager_changes, list_scheme_events
+from app.services.events import (
+    import_manager_changes,
+    import_scheme_events,
+    list_manager_changes,
+    list_scheme_events,
+)
 from app.services.funds_service import get_scheme_by_code
 
 router = APIRouter(prefix="/events", tags=["events"])
@@ -23,9 +28,7 @@ async def upload_manager_changes(
 
 
 @router.post("/scheme-events/import")
-async def upload_scheme_events(
-    file: UploadFile = File(...), db: Session = Depends(get_db)
-) -> dict:
+async def upload_scheme_events(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
     payload = await file.read()
     logger.info("scheme_events_import", filename=file.filename)
     count = import_scheme_events(db, payload)

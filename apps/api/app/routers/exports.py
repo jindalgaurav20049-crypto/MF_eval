@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.db.models import UserPortfolioTxn
 from app.db.session import get_db
 from app.services.exports import (
@@ -12,7 +13,6 @@ from app.services.exports import (
     build_portfolio_excel,
     build_portfolio_pdf,
 )
-from app.config import settings
 from app.services.funds_service import (
     compute_and_store_metrics,
     ensure_mf_universe,
@@ -25,9 +25,7 @@ router = APIRouter(prefix="/export", tags=["export"])
 
 
 @router.get("/funds/{scheme_id}/summary.xlsx")
-async def export_fund_summary_excel(
-    scheme_id: str, db: Session = Depends(get_db)
-) -> Response:
+async def export_fund_summary_excel(scheme_id: str, db: Session = Depends(get_db)) -> Response:
     summary = _fund_summary_data(db, scheme_id)
     payload = build_fund_summary_excel(summary)
     return Response(
@@ -38,9 +36,7 @@ async def export_fund_summary_excel(
 
 
 @router.get("/funds/{scheme_id}/summary.pdf")
-async def export_fund_summary_pdf(
-    scheme_id: str, db: Session = Depends(get_db)
-) -> Response:
+async def export_fund_summary_pdf(scheme_id: str, db: Session = Depends(get_db)) -> Response:
     summary = _fund_summary_data(db, scheme_id)
     payload = build_fund_summary_pdf(summary)
     return Response(
