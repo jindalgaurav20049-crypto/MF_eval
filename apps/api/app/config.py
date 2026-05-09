@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     auto_sync_navs: bool = True
     auto_sync_metrics: bool = True
     mfapi_timeout_seconds: int = 30
+    health_alert_threshold: float = 50.0
 
 
 settings = Settings()

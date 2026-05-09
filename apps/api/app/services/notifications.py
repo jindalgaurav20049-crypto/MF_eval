@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.db.models import AppUser, ComputedMetricSnapshot, Scheme, UserNotification, UserWatchlist
 
 
@@ -61,7 +62,7 @@ def generate_watchlist_alerts(db: Session) -> int:
         )
         if snapshot is None or snapshot.health_score is None:
             continue
-        if float(snapshot.health_score) < 50:
+        if float(snapshot.health_score) < settings.health_alert_threshold:
             notification = UserNotification(
                 user_id=entry.user_id,
                 scheme_id=entry.scheme_id,

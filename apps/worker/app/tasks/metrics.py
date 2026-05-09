@@ -8,6 +8,7 @@ import structlog
 from sqlalchemy import select
 
 from app.celery_app import celery_app
+from app.config import settings
 from app.db import SessionLocal
 from app.models import ComputedMetricSnapshot, NAVHistoryDaily, Scheme, UserNotification, UserWatchlist
 from analytics_engine.calculators.cagr import cagr_from_nav_series
@@ -98,7 +99,7 @@ def generate_watchlist_alerts() -> dict:
             )
             if snapshot is None or snapshot.health_score is None:
                 continue
-            if float(snapshot.health_score) < 50:
+            if float(snapshot.health_score) < settings.health_alert_threshold:
                 scheme = (
                     db.execute(select(Scheme).where(Scheme.id == entry.scheme_id))
                     .scalars()
