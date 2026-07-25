@@ -1,0 +1,248 @@
+[
+  {
+    "category": "Large Cap",
+    "search_term": "Axis Bluechip Fund Direct Growth",
+    "candidates": []
+  },
+  {
+    "category": "Large Cap",
+    "search_term": "Mirae Asset Large Cap Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 118825,
+        "schemeName": "Mirae Asset Large Cap Fund - Direct Plan - Growth",
+        "match_score": 0.898876404494382
+      }
+    ]
+  },
+  {
+    "category": "Large Cap",
+    "search_term": "ICICI Prudential Bluechip Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 120186,
+        "schemeName": "ICICI Prudential US Bluechip Equity Fund - Direct Plan -  Growth",
+        "match_score": 0.8148148148148148
+      },
+      {
+        "schemeCode": 120586,
+        "schemeName": "ICICI Prudential Large Cap Fund (erstwhile Bluechip Fund) - Direct Plan - Growth",
+        "match_score": 0.7096774193548387
+      }
+    ]
+  },
+  {
+    "category": "Flexi Cap",
+    "search_term": "Parag Parikh Flexi Cap Fund Direct Growth",
+    "candidates": []
+  },
+  {
+    "category": "Flexi Cap",
+    "search_term": "HDFC Flexi Cap Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 118955,
+        "schemeName": "HDFC Flexi Cap Fund - Growth Option - Direct Plan",
+        "match_score": 0.6585365853658537
+      }
+    ]
+  },
+  {
+    "category": "Flexi Cap",
+    "search_term": "Kotak Flexicap Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 120166,
+        "schemeName": "Kotak Flexicap Fund - Growth - Direct",
+        "match_score": 0.7714285714285715
+      }
+    ]
+  },
+  {
+    "category": "Mid Cap",
+    "search_term": "Kotak Emerging Equity Fund Direct Growth",
+    "candidates": []
+  },
+  {
+    "category": "Mid Cap",
+    "search_term": "Axis Midcap Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 120505,
+        "schemeName": "Axis Midcap Fund - Direct Plan - Growth",
+        "match_score": 0.8695652173913043
+      },
+      {
+        "schemeCode": 149936,
+        "schemeName": "Axis Nifty Midcap 50 Index Fund - Direct Plan - Growth Option",
+        "match_score": 0.6593406593406593
+      }
+    ]
+  },
+  {
+    "category": "Mid Cap",
+    "search_term": "PGIM India Midcap Opportunities Fund Direct Growth",
+    "candidates": []
+  },
+  {
+    "category": "Small Cap",
+    "search_term": "Nippon India Small Cap Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 118777,
+        "schemeName": "Nippon India Small Cap Fund - Direct Plan Growth Plan - Bonus Option",
+        "match_score": 0.7522935779816514
+      },
+      {
+        "schemeCode": 118778,
+        "schemeName": "Nippon India Small Cap Fund - Direct Plan Growth Plan - Growth Option",
+        "match_score": 0.7454545454545455
+      }
+    ]
+  },
+  {
+    "category": "Small Cap",
+    "search_term": "SBI Small Cap Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 125497,
+        "schemeName": "SBI Small Cap Fund - Direct Plan - Growth",
+        "match_score": 0.8767123287671232
+      }
+    ]
+  },
+  {
+    "category": "Small Cap",
+    "search_term": "Axis Small Cap Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 125354,
+        "schemeName": "Axis Small Cap Fund - Direct Plan - Growth",
+        "match_score": 0.88
+      }
+    ]
+  },
+  {
+    "category": "ELSS",
+    "search_term": "Axis Long Term Equity Fund Direct Growth",
+    "candidates": []
+  },
+  {
+    "category": "ELSS",
+    "search_term": "Mirae Asset Tax Saver Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 135781,
+        "schemeName": "Mirae Asset ELSS Tax Saver Fund - Direct Plan - Growth",
+        "match_score": 0.851063829787234
+      }
+    ]
+  },
+  {
+    "category": "ELSS",
+    "search_term": "Quant Tax Plan Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 120847,
+        "schemeName": "quant ELSS Tax Saver Fund - Growth Option - Direct Plan",
+        "match_score": 0.4819277108433735
+      }
+    ]
+  },
+  {
+    "category": "Debt Short Duration",
+    "search_term": "HDFC Short Term Debt Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 119016,
+        "schemeName": "HDFC Short Term  Debt Fund - Growth Option - Direct Plan",
+        "match_score": 0.6947368421052632
+      }
+    ]
+  },
+  {
+    "category": "Debt Short Duration",
+    "search_term": "ICICI Prudential Short Term Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 120608,
+        "schemeName": "ICICI Prudential Short Term Gilt Fund - Direct Plan -  Growth",
+        "match_score": 0.8598130841121495
+      },
+      {
+        "schemeCode": 120676,
+        "schemeName": "ICICI Prudential Ultra Short Term Fund - Direct Plan -  Growth",
+        "match_score": 0.8518518518518519
+      },
+      {
+        "schemeCode": 120754,
+        "schemeName": "ICICI Prudential Short Term Fund - Direct Plan - Growth Option",
+        "match_score": 0.8518518518518519
+      }
+    ]
+  },
+  {
+    "category": "Debt Short Duration",
+    "search_term": "Axis Short Term Fund Direct Growth",
+    "candidates": []
+  },
+  {
+    "category": "Hybrid - Balanced Advantage",
+    "search_term": "ICICI Prudential Balanced Advantage Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 120377,
+        "schemeName": "ICICI Prudential Balanced Advantage Fund - Direct Plan -  Growth",
+        "match_score": 0.9152542372881356
+      }
+    ]
+  },
+  {
+    "category": "Hybrid - Balanced Advantage",
+    "search_term": "HDFC Balanced Advantage Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 118968,
+        "schemeName": "HDFC Balanced Advantage Fund - Growth Plan - Direct Plan",
+        "match_score": 0.7346938775510204
+      }
+    ]
+  },
+  {
+    "category": "Hybrid - Balanced Advantage",
+    "search_term": "Edelweiss Balanced Advantage Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 118615,
+        "schemeName": "Edelweiss Balanced Advantage Fund -Direct Plan-Growth Option",
+        "match_score": 0.8785046728971962
+      },
+      {
+        "schemeCode": 140357,
+        "schemeName": "Edelweiss Balanced Advantage Fund - Direct Plan - Growth Option-deactivated",
+        "match_score": 0.7704918032786885
+      }
+    ]
+  },
+  {
+    "category": "Index Fund",
+    "search_term": "UTI Nifty 50 Index Fund Direct Growth",
+    "candidates": []
+  },
+  {
+    "category": "Index Fund",
+    "search_term": "HDFC Index Fund Nifty 50 Direct Growth",
+    "candidates": []
+  },
+  {
+    "category": "Index Fund",
+    "search_term": "ICICI Prudential Nifty 50 Index Fund Direct Growth",
+    "candidates": [
+      {
+        "schemeCode": 120684,
+        "schemeName": "ICICI Prudential Nifty Next 50 Index Fund - Direct Plan -  Growth",
+        "match_score": 0.8695652173913043
+      }
+    ]
+  }
+]
