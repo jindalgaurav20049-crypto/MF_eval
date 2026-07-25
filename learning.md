@@ -102,6 +102,78 @@ these well enough to defend them in an interview, not just recognize the terms.
 
 ---
 
+## Session 2 — Phase A Data Source Research
+
+**Date:** 2026-07-26
+
+### What we did
+- Set up `shristi/setup` branch, confirmed collaborator write access, committed
+  `learning.md`.
+- Researched real data sources for mutual fund NAV (price) data ahead of
+  writing the ingestion script.
+
+### Concepts introduced this session
+
+**Two different data sources, two different jobs**
+- **AMFI's `NAVAll.txt`** (`https://www.amfiindia.com/spages/NAVAll.txt`):
+  the official source of truth. Semicolon-delimited plain text, one row per
+  scheme: `Scheme Code;ISIN Growth;ISIN Reinvestment;Scheme Name;NAV;Date`.
+  Important limitation: this file is a **daily snapshot only** — it holds
+  today's NAV for every scheme, not history. It also interleaves category
+  headers (e.g. "Open Ended Schemes(Debt Scheme - Gilt Fund)") and AMC name
+  headers as blank lines between data rows, so a naive line-by-line parser
+  needs explicit logic to skip those.
+- **mfapi.in** (`https://api.mfapi.in/mf/{scheme_code}`): a free, no-auth
+  third-party API that has already parsed AMFI's full historical NAV per
+  scheme into clean JSON (`{"meta": {...}, "data": [{"date": ..., "nav": ...}]}`).
+  It's built on the same underlying AMFI data, just pre-assembled into
+  history for you.
+
+**Why we need both, not just one**
+- AMFI's daily file → good for the *universe* of schemes (names, AMCs,
+  categories) — matches the `amc`/`scheme` tables.
+- mfapi.in → good for *backfilling history* per scheme — feeds
+  `nav_history_daily`.
+- Going forward (once a full history exists), only AMFI's *daily* file is
+  needed to append one new row per scheme per day — no need to keep hitting
+  a third-party historical endpoint indefinitely.
+
+**A correctness subtlety for later (Phase B)**
+- Some schemes show `NAV: 0.0000` in the live AMFI file — these are real
+  zero NAVs from defunct/frozen "segregated portfolios" (e.g. old
+  Franklin/UTI carve-outs tied to specific defaulted bonds like Vodafone
+  Idea or Yes Bank), not bad data. Ingestion logic needs a deliberate
+  decision here (skip / flag inactive) rather than silently computing CAGR
+  on a fund that's actually worthless — a good "here's an edge case I
+  handled" interview story.
+
+### Interview questions to be able to answer out loud
+1. Why use two different data sources instead of one? What's each one
+   responsible for?
+2. What would break if you assumed AMFI's daily file contained historical
+   data?
+3. How would you design the ingestion so today's daily update doesn't
+   require re-fetching a scheme's entire history every time?
+4. A fund shows NAV = 0. Is that a data quality bug or a real value — how
+   do you tell the difference, and what should the system do with it?
+
+### Open questions / decisions to revisit
+- Which schemes to backfill first — full universe (~18,000 schemes) vs. a
+  curated starter set? **Decided:** curated set of ~24 funds across 8
+  categories (Large Cap, Flexi Cap, Mid Cap, Small Cap, ELSS, Debt-Short
+  Duration, Hybrid/Balanced Advantage, Index Fund) — enough variety for
+  Explore/Compare to feel real without full-universe ingestion overhead.
+- **Important finding:** the scheme codes currently hardcoded in the stub
+  data (`funds.py`, `compare.py` — e.g. `120503` used for "Parag Parikh
+  Flexi Cap Fund") do NOT match the real AMFI scheme codes for those funds.
+  These look like placeholder numbers, not verified codes. Do not reuse the
+  existing stub scheme IDs when writing the ingestion script — resolve each
+  fund's real scheme code fresh via mfapi.in's search endpoint
+  (`/mf/search?q=...`) instead of hardcoding from memory.
+- Next concrete coding step: a small standalone lookup script — fund name →
+  mfapi.in search → confirmed real scheme code — as the first testable
+  piece of the ingestion pipeline, before wiring anything to the database.
+
 ## Roadmap (living — update as phases complete)
 
 - [ ] **Phase A — Make it real:** ingest real AMFI NAV data, wire worker to
