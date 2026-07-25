@@ -174,6 +174,106 @@ these well enough to defend them in an interview, not just recognize the terms.
   mfapi.in search → confirmed real scheme code — as the first testable
   piece of the ingestion pipeline, before wiring anything to the database.
 
+## Session 3 — Scheme Lookup Script
+
+**Date:** 2026-07-26
+
+### What we did
+- Opened a PR (`shristi/setup` → `main`) so commits count toward GitHub
+  contribution graph and to build the habit of working through PRs.
+- Confirmed mfapi.in's search endpoint shape:
+  `GET /mf/search?q=...` → `[{"schemeCode": ..., "schemeName": ...}]`
+  (camelCase — inconsistent with the main NAV endpoint's snake_case
+  `scheme_code`, worth remembering so it doesn't cause a silent bug).
+- Wrote `scripts/lookup_schemes.py`: takes the curated list of ~24 fund
+  names across 8 categories, searches mfapi.in for each, and writes out
+  the top 3 fuzzy-matched candidates per fund to a JSON file for manual
+  human review — deliberately does NOT auto-pick a scheme code, since
+  that's exactly how the existing stub data ended up wrong.
+
+### Concepts introduced this session
+
+**Fuzzy string matching (`difflib.SequenceMatcher`)**
+- What: compares two strings and returns a similarity ratio (0 to 1)
+  based on matching subsequences, not exact equality.
+- Why needed here: mfapi's search is loose (substring/keyword-ish), so a
+  query like "Axis Bluechip Fund Direct Growth" might return several
+  near-matches (Direct vs Regular plan, Growth vs IDCW option). Ranking
+  by similarity surfaces the most likely correct match first, but a human
+  still confirms it — the script explicitly avoids auto-accepting the
+  top match.
+
+**Defensive external API calls**
+- The lookup function catches network errors and bad JSON per-request and
+  returns an empty list instead of crashing the whole batch — so one flaky
+  request doesn't lose the other 23 lookups. Small thing, but it's the
+  same "fail gracefully, don't crash the whole pipeline" principle as
+  Sharpe ratio's `None` return from last session.
+
+**Why "resolve, don't hardcode"**
+- This script produces output that still needs a human eyeball pass
+  before being trusted — the design intentionally keeps a human in the
+  loop for a one-time, high-stakes decision (which real scheme code maps
+  to which fund) rather than fully automating something that's cheap to
+  get wrong and expensive to have wrong silently (e.g. showing the wrong
+  fund's returns to a user).
+
+### Interview questions to be able to answer out loud
+1. What is fuzzy string matching, and when would exact string matching be
+   insufficient for a data resolution task like this?
+2. Why does this script write a review file instead of directly writing
+   confirmed scheme codes to the database?
+3. Why catch exceptions per-item in a batch job instead of one try/except
+   around the whole loop?
+4. What's the risk of trusting an external free API's search ranking
+   without any independent verification?
+
+### Open questions / decisions to revisit
+- After running `lookup_schemes.py` locally and reviewing
+  `resolved_schemes.json`, next session's job is to write the actual
+  ingestion script that takes the *confirmed* scheme codes and populates
+  `amc`, `scheme`, and `nav_history_daily` via mfapi.in's history endpoint.
+- **Major update — see below.** A pre-existing unmerged branch may already
+  cover much of this. Confirm before writing new ingestion code from
+  scratch.
+
+### Addendum — CI investigation & major discovery (same session, PR #3 opened)
+
+**CI failure triage:** PR #3's two failing checks are pre-existing issues
+on `main`, unrelated to our changes (our PR only touched root-level
+`learning.md` and `scripts/`, outside both linted directories):
+- `API — Lint & Test` fails at the `ruff format --check` step — 4 files
+  have lines that don't match the formatter's style (tests themselves
+  pass, 7/7).
+- `Analytics Engine — Lint & Test` fails at `ruff check` — import-order
+  violations in `test_cagr.py` and `test_drawdown.py`. Both fixable with
+  `ruff format .` / `ruff check --fix .` in seconds, whenever we get to
+  Phase B polish.
+
+**Major discovery:** an unmerged branch `copilot/implement-phase-2-application`
+(PR #2, opened by the Copilot cloud agent, never merged — likely blocked
+on an unapproved workflow-permissions gate) already contains real,
+non-stub implementations of much of what we planned for Phase A, and
+beyond:
+- `apps/api/app/services/mfapi_client.py` — client for both AMFI's daily
+  file and mfapi.in's history endpoint; defensively handles both APIs'
+  inconsistent camelCase/snake_case field naming
+- `apps/api/app/services/ingestion.py` — populates `AMC`/`Scheme` and
+  syncs NAV history into the DB
+- `apps/worker/app/tasks/metrics.py` — actually computes CAGR/Sharpe/
+  Drawdown from real NAV history and writes to `computed_metric_snapshot`
+  (this is the exact worker logic we were planning to write ourselves)
+- Also includes `watchlist.py`, `portfolio.py`, `notifications.py`,
+  `exports.py` — reaching into what we'd scoped as Phase C/D
+
+**Decision for next session:** do NOT merge this blindly. Review it
+properly first — check correctness (does it handle the zero-NAV /
+defunct-scheme edge case we found in Session 2?), check test coverage,
+understand the design before adopting any of it. The value of this
+project is understanding the code well enough to defend it in an
+interview, not having more code exist. Treat this as a code review
+session, not a merge-and-move-on session.
+
 ## Roadmap (living — update as phases complete)
 
 - [ ] **Phase A — Make it real:** ingest real AMFI NAV data, wire worker to
