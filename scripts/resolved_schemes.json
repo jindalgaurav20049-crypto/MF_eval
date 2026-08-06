@@ -184,8 +184,27 @@
   },
   {
     "category": "Mid Cap",
-    "search_term": "PGIM India Midcap Opportunities",
-    "candidates": []
+    "search_term": "PGIM India Midcap Fund Direct Growth",
+    "candidates": [
+      {
+        "scheme_code": 125307,
+        "scheme_name": "PGIM India Midcap Fund - Direct Plan - Growth Option",
+        "isin": "INF663L01DV3",
+        "category_sub": "Mid Cap Fund",
+        "is_active": true,
+        "relevance": 18,
+        "match_score": 0.8181818181818182
+      },
+      {
+        "scheme_code": 152382,
+        "scheme_name": "PGIM India Large and Midcap Fund - Direct Plan - Growth Option",
+        "isin": "INF663L01Y12",
+        "category_sub": "Large & Mid Cap Fund",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.7346938775510204
+      }
+    ]
   },
   {
     "category": "Small Cap",
@@ -372,8 +391,27 @@
   },
   {
     "category": "Debt Short Duration",
-    "search_term": "Axis Short Term",
-    "candidates": []
+    "search_term": "Axis Short Duration Fund Direct Growth",
+    "candidates": [
+      {
+        "scheme_code": 144754,
+        "scheme_name": "Axis Ultra Short Duration Fund - Direct Plan Growth",
+        "isin": "INF846K01F40",
+        "category_sub": "Ultra Short Duration Fund",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.8539325842696629
+      },
+      {
+        "scheme_code": 120510,
+        "scheme_name": "Axis Short Duration Fund - Direct Plan - Growth Option",
+        "isin": "INF846K01EI1",
+        "category_sub": "Short Duration Fund",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.8260869565217391
+      }
+    ]
   },
   {
     "category": "Hybrid - Balanced Advantage",
