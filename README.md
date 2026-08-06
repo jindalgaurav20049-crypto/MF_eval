@@ -153,7 +153,7 @@ curl "http://localhost:8000/compare?scheme_ids=101206,119598"
 
 ## Known Follow-up Tasks (Phase 2)
 
-- [ ] Implement actual MF data ingestion from AMFI / MFI API
+- [ ] Implement actual MF data ingestion from AMFI / MFI API / TigZig API
 - [ ] Implement metric computation engine (CAGR, Sharpe, Drawdown, etc.)
 - [ ] Wire analytics-engine into API routes
 - [ ] Implement rolling return heatmap endpoints
