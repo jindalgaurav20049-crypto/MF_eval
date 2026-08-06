@@ -417,6 +417,95 @@ A genuine multi-user product, not a portfolio demo:
 - Re-scoped roadmap below reflects the full vision minus holdings (see
   backlog line).
 
+## Session 6 — Real Ingestion Script + a Correction
+
+**Date:** 2026-08-06
+
+### What we did
+- **Correction:** Session 5 claimed "no users table at all" in the schema
+  — that was wrong, caught by re-checking the actual model file before
+  writing new code. `AppUser` already exists (`app_user` table: email,
+  display_name, analysis_mode). Phase C (real user accounts) needs auth
+  wired to it, not the table built from scratch. Lesson: re-verify
+  assumptions against the actual code before planning around them,
+  especially assumptions repeated confidently across sessions.
+- Added an `amc` field to each entry in `lookup_schemes.py`'s
+  `CURATED_FUNDS` (Tigzig's NAV data doesn't include AMC name, only
+  scheme-level info — needed it for populating the `amc` table).
+- Wrote `scripts/ingest_nav_data.py` — the real Phase A ingestion script.
+  Independent, from-scratch work (not from PR #2, per Gaurav's call in
+  Session 4).
+
+### What the ingestion script does
+1. Reads the human-reviewed `resolved_schemes.json`, takes the top-ranked
+   candidate per fund
+2. One batch call to Tigzig's NAV endpoint for all 24 scheme codes at once
+   (not 24 separate calls)
+3. Get-or-create `AMC` and `Scheme` rows
+4. Inserts `NAVHistoryDaily` rows — **skips zero/invalid NAV values**
+   rather than inserting them as real prices (the defunct-scheme edge
+   case from Session 2, finally implemented, not just discussed)
+5. Safe to re-run: checks existing `(scheme_id, nav_date)` rows before
+   inserting, so running it twice doesn't duplicate or error
+
+### Concepts introduced this session
+
+**Reusing real ORM models instead of redefining them in a script**
+- The script adds `apps/api` to `sys.path` and imports the actual
+  `AMC`/`Scheme`/`NAVHistoryDaily` SQLAlchemy models rather than writing
+  parallel dataclasses. Redefining the schema in two places is a
+  guaranteed way for them to quietly drift apart over time.
+
+**Idempotency — designing a script to be safely re-run**
+- `insert_nav_rows` checks which `(scheme, date)` pairs already exist
+  before inserting. Without this, running the script twice would either
+  crash on a duplicate primary key or, worse, silently double-count data.
+  A pipeline you expect to run repeatedly (daily, or by hand while
+  debugging) should be safe to run more than once.
+
+**Separating "get the right data in" from "compute things from it"**
+- Ingestion intentionally does NOT compute CAGR/Sharpe/Drawdown — that
+  stays the worker's job. If a metric looks wrong later, this separation
+  makes it possible to check "is the raw data wrong, or is the
+  computation wrong?" as two independent questions instead of one
+  tangled one.
+
+**AMC code as a stand-in, flagged not hidden**
+- The `amc` table requires a unique `amfi_code`, but Tigzig's data
+  doesn't give us AMFI's actual AMC code — only the fund house's name.
+  The script slugifies the name as a placeholder and says so in a
+  comment, rather than silently treating a made-up value as real data.
+  A good habit: when you have to fill a gap with something you're not
+  fully confident in, say so in the code, don't just make it look correct.
+
+### Interview questions to be able to answer out loud
+1. Why import the real ORM models into a standalone script instead of
+   just writing raw SQL or redefining lightweight versions of them?
+2. What does "idempotent" mean for a data pipeline, and what breaks if a
+   script like this isn't?
+3. Why keep ingestion and metric computation as separate steps rather
+   than computing CAGR immediately after inserting each NAV row?
+4. You need a value your data source doesn't actually provide (AMC code)
+   — what are your options, and why pick a flagged stand-in over leaving
+   the field null or guessing silently?
+
+### How to run this (for Shristi/Gaurav, not just notes)
+```bash
+docker-compose up -d postgres redis
+cd apps/api && alembic upgrade head && cd ../..
+pip install requests sqlalchemy psycopg2-binary
+python scripts/ingest_nav_data.py
+```
+
+### Open questions / decisions to revisit
+- Tigzig's batch NAV response shape (`schemes` / `not_found` keys) is
+  documented but not yet live-tested — `fetch_batch_nav()` is written
+  defensively with fallbacks. First real run will confirm which shape
+  actually comes back; simplify the function once known.
+- AMC code is a slugified stand-in, not a real AMFI AMC code — fine for
+  now, but worth sourcing properly before this goes further (e.g. Tigzig's
+  scheme master / bulk download may have it).
+
 ## Roadmap (living — update as phases complete)
 
 - [ ] **Phase A — Core NAV pipeline:** ingest real NAV data for the 24

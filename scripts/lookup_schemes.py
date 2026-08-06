@@ -48,37 +48,37 @@ OUTPUT_PATH = Path(__file__).parent / "resolved_schemes.json"
 # script is that we don't trust hand-typed scheme codes anymore.
 CURATED_FUNDS: list[dict[str, str]] = [
     # Large Cap
-    {"category": "Large Cap", "search": "Axis Large Cap Fund Direct Growth"},  # renamed from Axis Bluechip Fund, June 2025
-    {"category": "Large Cap", "search": "Mirae Asset Large Cap Fund Direct Growth"},
-    {"category": "Large Cap", "search": "ICICI Prudential Bluechip Fund Direct Growth"},
+    {"category": "Large Cap", "amc": "Axis Mutual Fund", "search": "Axis Large Cap Fund Direct Growth"},  # renamed from Axis Bluechip Fund, June 2025
+    {"category": "Large Cap", "amc": "Mirae Asset Mutual Fund", "search": "Mirae Asset Large Cap Fund Direct Growth"},
+    {"category": "Large Cap", "amc": "ICICI Prudential Mutual Fund", "search": "ICICI Prudential Bluechip Fund Direct Growth"},
     # Flexi Cap
-    {"category": "Flexi Cap", "search": "Parag Parikh Flexi Cap Fund Direct Growth"},
-    {"category": "Flexi Cap", "search": "HDFC Flexi Cap Fund Direct Growth"},
-    {"category": "Flexi Cap", "search": "Kotak Flexicap Fund Direct Growth"},
+    {"category": "Flexi Cap", "amc": "PPFAS Mutual Fund", "search": "Parag Parikh Flexi Cap Fund Direct Growth"},
+    {"category": "Flexi Cap", "amc": "HDFC Mutual Fund", "search": "HDFC Flexi Cap Fund Direct Growth"},
+    {"category": "Flexi Cap", "amc": "Kotak Mahindra Mutual Fund", "search": "Kotak Flexicap Fund Direct Growth"},
     # Mid Cap
-    {"category": "Mid Cap", "search": "Kotak Emerging Equity"},  # simplified — "...Fund Direct Growth" returned no matches, worth rechecking for a rename too
-    {"category": "Mid Cap", "search": "Axis Midcap Fund Direct Growth"},
-    {"category": "Mid Cap", "search": "PGIM India Midcap Fund Direct Growth"},  # renamed from PGIM India Midcap Opportunities Fund
+    {"category": "Mid Cap", "amc": "Kotak Mahindra Mutual Fund", "search": "Kotak Emerging Equity"},  # simplified — "...Fund Direct Growth" returned no matches, worth rechecking for a rename too
+    {"category": "Mid Cap", "amc": "Axis Mutual Fund", "search": "Axis Midcap Fund Direct Growth"},
+    {"category": "Mid Cap", "amc": "PGIM India Mutual Fund", "search": "PGIM India Midcap Fund Direct Growth"},  # renamed from PGIM India Midcap Opportunities Fund
     # Small Cap
-    {"category": "Small Cap", "search": "Nippon India Small Cap Fund Direct Growth"},
-    {"category": "Small Cap", "search": "SBI Small Cap Fund Direct Growth"},
-    {"category": "Small Cap", "search": "Axis Small Cap Fund Direct Growth"},
+    {"category": "Small Cap", "amc": "Nippon India Mutual Fund", "search": "Nippon India Small Cap Fund Direct Growth"},
+    {"category": "Small Cap", "amc": "SBI Mutual Fund", "search": "SBI Small Cap Fund Direct Growth"},
+    {"category": "Small Cap", "amc": "Axis Mutual Fund", "search": "Axis Small Cap Fund Direct Growth"},
     # ELSS (tax-saving)
-    {"category": "ELSS", "search": "Axis ELSS Tax Saver Fund Direct Growth"},  # renamed from Axis Long Term Equity Fund, Dec 2023
-    {"category": "ELSS", "search": "Mirae Asset Tax Saver Fund Direct Growth"},
-    {"category": "ELSS", "search": "Quant Tax Plan Direct Growth"},
+    {"category": "ELSS", "amc": "Axis Mutual Fund", "search": "Axis ELSS Tax Saver Fund Direct Growth"},  # renamed from Axis Long Term Equity Fund, Dec 2023
+    {"category": "ELSS", "amc": "Mirae Asset Mutual Fund", "search": "Mirae Asset Tax Saver Fund Direct Growth"},
+    {"category": "ELSS", "amc": "Quant Mutual Fund", "search": "Quant Tax Plan Direct Growth"},
     # Debt — Short Duration
-    {"category": "Debt Short Duration", "search": "HDFC Short Term Debt Fund Direct Growth"},
-    {"category": "Debt Short Duration", "search": "ICICI Prudential Short Term Fund Direct Growth"},
-    {"category": "Debt Short Duration", "search": "Axis Short Duration Fund Direct Growth"},  # renamed from Axis Short Term Fund
+    {"category": "Debt Short Duration", "amc": "HDFC Mutual Fund", "search": "HDFC Short Term Debt Fund Direct Growth"},
+    {"category": "Debt Short Duration", "amc": "ICICI Prudential Mutual Fund", "search": "ICICI Prudential Short Term Fund Direct Growth"},
+    {"category": "Debt Short Duration", "amc": "Axis Mutual Fund", "search": "Axis Short Duration Fund Direct Growth"},  # renamed from Axis Short Term Fund
     # Hybrid / Balanced Advantage
-    {"category": "Hybrid - Balanced Advantage", "search": "ICICI Prudential Balanced Advantage Fund Direct Growth"},
-    {"category": "Hybrid - Balanced Advantage", "search": "HDFC Balanced Advantage Fund Direct Growth"},
-    {"category": "Hybrid - Balanced Advantage", "search": "Edelweiss Balanced Advantage Fund Direct Growth"},
+    {"category": "Hybrid - Balanced Advantage", "amc": "ICICI Prudential Mutual Fund", "search": "ICICI Prudential Balanced Advantage Fund Direct Growth"},
+    {"category": "Hybrid - Balanced Advantage", "amc": "HDFC Mutual Fund", "search": "HDFC Balanced Advantage Fund Direct Growth"},
+    {"category": "Hybrid - Balanced Advantage", "amc": "Edelweiss Mutual Fund", "search": "Edelweiss Balanced Advantage Fund Direct Growth"},
     # Index Fund (useful as an in-app benchmark)
-    {"category": "Index Fund", "search": "UTI Nifty 50 Index Fund Direct Growth"},
-    {"category": "Index Fund", "search": "HDFC Index Fund Nifty 50 Direct Growth"},
-    {"category": "Index Fund", "search": "ICICI Prudential Nifty 50 Index Fund Direct Growth"},
+    {"category": "Index Fund", "amc": "UTI Mutual Fund", "search": "UTI Nifty 50 Index Fund Direct Growth"},
+    {"category": "Index Fund", "amc": "HDFC Mutual Fund", "search": "HDFC Index Fund Nifty 50 Direct Growth"},
+    {"category": "Index Fund", "amc": "ICICI Prudential Mutual Fund", "search": "ICICI Prudential Nifty 50 Index Fund Direct Growth"},
 ]
 
 
@@ -100,7 +100,7 @@ def search_tigzig(query: str) -> list[dict]:
     non-200, bad JSON) rather than raising — one bad lookup shouldn't kill
     the whole batch."""
     try:
-        resp = requests.get(TIGZIG_SEARCH_URL, params={"q": query}, timeout=10)
+        resp = requests.get(TIGZIG_SEARCH_URL, params={"q": query}, timeout=25)
         resp.raise_for_status()
         data = resp.json()
         # Response may be a bare list or wrapped under a "results"/"data" key
@@ -140,6 +140,7 @@ def main() -> None:
         results.append(
             {
                 "category": fund["category"],
+                "amc": fund["amc"],
                 "search_term": fund["search"],
                 "candidates": top,  # human picks the right one; do not auto-accept
             }
