@@ -332,16 +332,19 @@ back empty, and **the exact same 5 failed on both mfapi.in and Tigzig in
 separate runs**. Two independent providers agreeing on "no match" ruled out
 a provider-specific bug — pointed at our search strings instead.
 
-**Root cause, confirmed via research:** real mutual funds get renamed.
-- `Axis Bluechip Fund` → `Axis Large Cap Fund` (effective June 2, 2025)
-- `Axis Long Term Equity Fund` → `Axis ELSS Tax Saver Fund` (effective
-  December 8, 2023 — part of an industry-wide SEBI-driven rename of ELSS
-  fund names)
+**Root cause, confirmed via research — 4 renames total, all now fixed:**
+- `Axis Bluechip Fund` → `Axis Large Cap Fund` (June 2, 2025)
+- `Axis Long Term Equity Fund` → `Axis ELSS Tax Saver Fund` (Dec 8, 2023 —
+  part of an industry-wide SEBI-driven ELSS renaming)
+- `PGIM India Midcap Opportunities Fund` → `PGIM India Midcap Fund`
+- `Axis Short Term Fund` → `Axis Short Duration Fund` (SEBI category-name
+  standardization — same pattern as the ELSS rename)
 
-Both are fixed in `CURATED_FUNDS` now. The other 3 stubborn ones (Kotak
-Emerging Equity, PGIM India Midcap Opportunities, Axis Short Term) got
-simplified search terms rather than a guessed rename — worth checking
-these properly on the next run rather than assuming.
+All 4 confirmed via real sources (fund fact sheets / value research), not
+guessed. `Kotak Emerging Equity` was left as a simplified search term
+without a confirmed rename — that one's a genuine "the exact suffix
+matters to the search" case rather than a rename, worth a final check on
+next run but not chased further this session.
 
 **Why this matters beyond just fixing 5 rows:** this is a real
 data-quality problem the ingestion pipeline will hit again, permanently —

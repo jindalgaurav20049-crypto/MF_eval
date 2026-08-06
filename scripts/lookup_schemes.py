@@ -58,7 +58,7 @@ CURATED_FUNDS: list[dict[str, str]] = [
     # Mid Cap
     {"category": "Mid Cap", "search": "Kotak Emerging Equity"},  # simplified — "...Fund Direct Growth" returned no matches, worth rechecking for a rename too
     {"category": "Mid Cap", "search": "Axis Midcap Fund Direct Growth"},
-    {"category": "Mid Cap", "search": "PGIM India Midcap Opportunities"},  # simplified — same as above; PGIM India's AMC business may have changed hands, worth checking current branding
+    {"category": "Mid Cap", "search": "PGIM India Midcap Fund Direct Growth"},  # renamed from PGIM India Midcap Opportunities Fund
     # Small Cap
     {"category": "Small Cap", "search": "Nippon India Small Cap Fund Direct Growth"},
     {"category": "Small Cap", "search": "SBI Small Cap Fund Direct Growth"},
@@ -70,7 +70,7 @@ CURATED_FUNDS: list[dict[str, str]] = [
     # Debt — Short Duration
     {"category": "Debt Short Duration", "search": "HDFC Short Term Debt Fund Direct Growth"},
     {"category": "Debt Short Duration", "search": "ICICI Prudential Short Term Fund Direct Growth"},
-    {"category": "Debt Short Duration", "search": "Axis Short Term"},  # simplified — "...Fund Direct Growth" returned no matches, worth rechecking for a rename too
+    {"category": "Debt Short Duration", "search": "Axis Short Duration Fund Direct Growth"},  # renamed from Axis Short Term Fund
     # Hybrid / Balanced Advantage
     {"category": "Hybrid - Balanced Advantage", "search": "ICICI Prudential Balanced Advantage Fund Direct Growth"},
     {"category": "Hybrid - Balanced Advantage", "search": "HDFC Balanced Advantage Fund Direct Growth"},
