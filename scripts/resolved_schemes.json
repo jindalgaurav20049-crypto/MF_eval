@@ -1,17 +1,58 @@
 [
   {
     "category": "Large Cap",
-    "search_term": "Axis Bluechip Fund Direct Growth",
-    "candidates": []
+    "search_term": "Axis Large Cap Fund Direct Growth",
+    "candidates": [
+      {
+        "scheme_code": 120465,
+        "scheme_name": "Axis Large Cap Fund - Direct Plan - Growth",
+        "isin": "INF846K01DP8",
+        "category_sub": "Large Cap Fund",
+        "is_active": true,
+        "relevance": 18,
+        "match_score": 0.88
+      },
+      {
+        "scheme_code": 145110,
+        "scheme_name": "Axis Large & Mid Cap Fund - Direct Plan - Growth",
+        "isin": "INF846K01J46",
+        "category_sub": "Large & Mid Cap Fund",
+        "is_active": true,
+        "relevance": 18,
+        "match_score": 0.8148148148148148
+      }
+    ]
   },
   {
     "category": "Large Cap",
     "search_term": "Mirae Asset Large Cap Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 118825,
-        "schemeName": "Mirae Asset Large Cap Fund - Direct Plan - Growth",
+        "scheme_code": 118825,
+        "scheme_name": "Mirae Asset Large Cap Fund - Direct Plan - Growth",
+        "isin": "INF769K01AX2",
+        "category_sub": "Large Cap Fund",
+        "is_active": true,
+        "relevance": 18,
         "match_score": 0.898876404494382
+      },
+      {
+        "scheme_code": 118834,
+        "scheme_name": "Mirae Asset Large & Midcap Fund - Direct Plan - Growth",
+        "isin": "INF769K01BI1",
+        "category_sub": "Large & Mid Cap Fund",
+        "is_active": true,
+        "relevance": 18,
+        "match_score": 0.851063829787234
+      },
+      {
+        "scheme_code": 152976,
+        "scheme_name": "Mirae Asset Nifty LargeMidcap 250 Index Fund - Direct Plan - Growth",
+        "isin": "INF769K01MJ6",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.7289719626168224
       }
     ]
   },
@@ -20,13 +61,21 @@
     "search_term": "ICICI Prudential Bluechip Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 120186,
-        "schemeName": "ICICI Prudential US Bluechip Equity Fund - Direct Plan -  Growth",
+        "scheme_code": 120186,
+        "scheme_name": "ICICI Prudential US Bluechip Equity Fund - Direct Plan -  Growth",
+        "isin": "INF109K01Z71",
+        "category_sub": "Sectoral/Thematic",
+        "is_active": true,
+        "relevance": 3,
         "match_score": 0.8148148148148148
       },
       {
-        "schemeCode": 120586,
-        "schemeName": "ICICI Prudential Large Cap Fund (erstwhile Bluechip Fund) - Direct Plan - Growth",
+        "scheme_code": 120586,
+        "scheme_name": "ICICI Prudential Large Cap Fund (erstwhile Bluechip Fund) - Direct Plan - Growth",
+        "isin": "INF109K016L0",
+        "category_sub": "Large Cap Fund",
+        "is_active": true,
+        "relevance": 18,
         "match_score": 0.7096774193548387
       }
     ]
@@ -34,15 +83,29 @@
   {
     "category": "Flexi Cap",
     "search_term": "Parag Parikh Flexi Cap Fund Direct Growth",
-    "candidates": []
+    "candidates": [
+      {
+        "scheme_code": 122639,
+        "scheme_name": "Parag Parikh Flexi Cap Fund - Direct Plan - Growth",
+        "isin": "INF879O01027",
+        "category_sub": "Flexi Cap Fund",
+        "is_active": true,
+        "relevance": 18,
+        "match_score": 0.9010989010989011
+      }
+    ]
   },
   {
     "category": "Flexi Cap",
     "search_term": "HDFC Flexi Cap Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 118955,
-        "schemeName": "HDFC Flexi Cap Fund - Growth Option - Direct Plan",
+        "scheme_code": 118955,
+        "scheme_name": "HDFC Flexi Cap Fund - Growth Option - Direct Plan",
+        "isin": "INF179K01UT0",
+        "category_sub": "Flexi Cap Fund",
+        "is_active": true,
+        "relevance": 18,
         "match_score": 0.6585365853658537
       }
     ]
@@ -52,36 +115,76 @@
     "search_term": "Kotak Flexicap Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 120166,
-        "schemeName": "Kotak Flexicap Fund - Growth - Direct",
+        "scheme_code": 120166,
+        "scheme_name": "Kotak Flexicap Fund - Growth - Direct",
+        "isin": "INF174K01LS2",
+        "category_sub": "Flexi Cap Fund",
+        "is_active": true,
+        "relevance": 18,
         "match_score": 0.7714285714285715
       }
     ]
   },
   {
     "category": "Mid Cap",
-    "search_term": "Kotak Emerging Equity Fund Direct Growth",
-    "candidates": []
+    "search_term": "Kotak Emerging Equity",
+    "candidates": [
+      {
+        "scheme_code": 106441,
+        "scheme_name": "Kotak Global Emerging Market Overseas Equity Omni FOF- Growth",
+        "isin": "INF174K01DV3",
+        "category_sub": "FoF Overseas",
+        "is_active": true,
+        "relevance": 3,
+        "match_score": 0.5121951219512195
+      },
+      {
+        "scheme_code": 119779,
+        "scheme_name": "Kotak Global Emerging Market overseas Equity Omni FOF - Growth - Direct",
+        "isin": "INF174K01LW4",
+        "category_sub": "FoF Overseas",
+        "is_active": true,
+        "relevance": 3,
+        "match_score": 0.45652173913043476
+      },
+      {
+        "scheme_code": 106442,
+        "scheme_name": "Kotak Global Emerging Market Overseas Equity Omni FOF - Payout of Income Distribution cum capital withdrawal option",
+        "isin": "INF174K01DX9",
+        "category_sub": "FoF Overseas",
+        "is_active": true,
+        "relevance": 3,
+        "match_score": 0.3088235294117647
+      }
+    ]
   },
   {
     "category": "Mid Cap",
     "search_term": "Axis Midcap Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 120505,
-        "schemeName": "Axis Midcap Fund - Direct Plan - Growth",
+        "scheme_code": 120505,
+        "scheme_name": "Axis Midcap Fund - Direct Plan - Growth",
+        "isin": "INF846K01EH3",
+        "category_sub": "Mid Cap Fund",
+        "is_active": true,
+        "relevance": 18,
         "match_score": 0.8695652173913043
       },
       {
-        "schemeCode": 149936,
-        "schemeName": "Axis Nifty Midcap 50 Index Fund - Direct Plan - Growth Option",
+        "scheme_code": 149936,
+        "scheme_name": "Axis Nifty Midcap 50 Index Fund - Direct Plan - Growth Option",
+        "isin": "INF846K019H0",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
         "match_score": 0.6593406593406593
       }
     ]
   },
   {
     "category": "Mid Cap",
-    "search_term": "PGIM India Midcap Opportunities Fund Direct Growth",
+    "search_term": "PGIM India Midcap Opportunities",
     "candidates": []
   },
   {
@@ -89,14 +192,31 @@
     "search_term": "Nippon India Small Cap Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 118777,
-        "schemeName": "Nippon India Small Cap Fund - Direct Plan Growth Plan - Bonus Option",
+        "scheme_code": 118777,
+        "scheme_name": "Nippon India Small Cap Fund - Direct Plan Growth Plan - Bonus Option",
+        "isin": "INF204K01J83",
+        "category_sub": "Small Cap Fund",
+        "is_active": true,
+        "relevance": 13,
         "match_score": 0.7522935779816514
       },
       {
-        "schemeCode": 118778,
-        "schemeName": "Nippon India Small Cap Fund - Direct Plan Growth Plan - Growth Option",
+        "scheme_code": 118778,
+        "scheme_name": "Nippon India Small Cap Fund - Direct Plan Growth Plan - Growth Option",
+        "isin": "INF204K01K15",
+        "category_sub": "Small Cap Fund",
+        "is_active": true,
+        "relevance": 18,
         "match_score": 0.7454545454545455
+      },
+      {
+        "scheme_code": 148519,
+        "scheme_name": "Nippon India Nifty Smallcap 250 Index Fund - Direct Plan - Growth Option",
+        "isin": "INF204KB15W0",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.7079646017699115
       }
     ]
   },
@@ -105,9 +225,22 @@
     "search_term": "SBI Small Cap Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 125497,
-        "schemeName": "SBI Small Cap Fund - Direct Plan - Growth",
+        "scheme_code": 125497,
+        "scheme_name": "SBI Small Cap Fund - Direct Plan - Growth",
+        "isin": "INF200K01T51",
+        "category_sub": "Small Cap Fund",
+        "is_active": true,
+        "relevance": 18,
         "match_score": 0.8767123287671232
+      },
+      {
+        "scheme_code": 150677,
+        "scheme_name": "SBI Nifty Smallcap 250 Index Fund - Direct Plan - Growth",
+        "isin": "INF200KA16P2",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.7045454545454546
       }
     ]
   },
@@ -116,24 +249,51 @@
     "search_term": "Axis Small Cap Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 125354,
-        "schemeName": "Axis Small Cap Fund - Direct Plan - Growth",
+        "scheme_code": 125354,
+        "scheme_name": "Axis Small Cap Fund - Direct Plan - Growth",
+        "isin": "INF846K01K35",
+        "category_sub": "Small Cap Fund",
+        "is_active": true,
+        "relevance": 18,
         "match_score": 0.88
+      },
+      {
+        "scheme_code": 149894,
+        "scheme_name": "Axis Nifty Smallcap 50 Index Fund - Direct Plan - Growth Option",
+        "isin": "INF846K013H3",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.6666666666666666
       }
     ]
   },
   {
     "category": "ELSS",
-    "search_term": "Axis Long Term Equity Fund Direct Growth",
-    "candidates": []
+    "search_term": "Axis ELSS Tax Saver Fund Direct Growth",
+    "candidates": [
+      {
+        "scheme_code": 120503,
+        "scheme_name": "Axis ELSS Tax Saver Fund - Direct Plan - Growth Option",
+        "isin": "INF846K01EW2",
+        "category_sub": "ELSS",
+        "is_active": true,
+        "relevance": 18,
+        "match_score": 0.8260869565217391
+      }
+    ]
   },
   {
     "category": "ELSS",
     "search_term": "Mirae Asset Tax Saver Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 135781,
-        "schemeName": "Mirae Asset ELSS Tax Saver Fund - Direct Plan - Growth",
+        "scheme_code": 135781,
+        "scheme_name": "Mirae Asset ELSS Tax Saver Fund - Direct Plan - Growth",
+        "isin": "INF769K01DM9",
+        "category_sub": "ELSS",
+        "is_active": true,
+        "relevance": 8,
         "match_score": 0.851063829787234
       }
     ]
@@ -143,8 +303,21 @@
     "search_term": "Quant Tax Plan Direct Growth",
     "candidates": [
       {
-        "schemeCode": 120847,
-        "schemeName": "quant ELSS Tax Saver Fund - Growth Option - Direct Plan",
+        "scheme_code": 111549,
+        "scheme_name": "Quantum ELSS Tax Saver Fund - Direct Plan Growth Option",
+        "isin": "INF082J01069",
+        "category_sub": "ELSS",
+        "is_active": true,
+        "relevance": 3,
+        "match_score": 0.6265060240963856
+      },
+      {
+        "scheme_code": 120847,
+        "scheme_name": "quant ELSS Tax Saver Fund - Growth Option - Direct Plan",
+        "isin": "INF966L01986",
+        "category_sub": "ELSS",
+        "is_active": true,
+        "relevance": 8,
         "match_score": 0.4819277108433735
       }
     ]
@@ -154,8 +327,12 @@
     "search_term": "HDFC Short Term Debt Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 119016,
-        "schemeName": "HDFC Short Term  Debt Fund - Growth Option - Direct Plan",
+        "scheme_code": 119016,
+        "scheme_name": "HDFC Short Term  Debt Fund - Growth Option - Direct Plan",
+        "isin": "INF179K01YM7",
+        "category_sub": "Short Duration Fund",
+        "is_active": true,
+        "relevance": 13,
         "match_score": 0.6947368421052632
       }
     ]
@@ -165,25 +342,37 @@
     "search_term": "ICICI Prudential Short Term Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 120608,
-        "schemeName": "ICICI Prudential Short Term Gilt Fund - Direct Plan -  Growth",
+        "scheme_code": 120608,
+        "scheme_name": "ICICI Prudential Short Term Gilt Fund - Direct Plan -  Growth",
+        "isin": "INF109K014D2",
+        "category_sub": "Gilt Fund",
+        "is_active": false,
+        "relevance": 10,
         "match_score": 0.8598130841121495
       },
       {
-        "schemeCode": 120676,
-        "schemeName": "ICICI Prudential Ultra Short Term Fund - Direct Plan -  Growth",
+        "scheme_code": 120754,
+        "scheme_name": "ICICI Prudential Short Term Fund - Direct Plan - Growth Option",
+        "isin": "INF109K013N3",
+        "category_sub": "Short Duration Fund",
+        "is_active": true,
+        "relevance": 13,
         "match_score": 0.8518518518518519
       },
       {
-        "schemeCode": 120754,
-        "schemeName": "ICICI Prudential Short Term Fund - Direct Plan - Growth Option",
+        "scheme_code": 120676,
+        "scheme_name": "ICICI Prudential Ultra Short Term Fund - Direct Plan -  Growth",
+        "isin": "INF109K01T04",
+        "category_sub": "Ultra Short Duration Fund",
+        "is_active": true,
+        "relevance": 13,
         "match_score": 0.8518518518518519
       }
     ]
   },
   {
     "category": "Debt Short Duration",
-    "search_term": "Axis Short Term Fund Direct Growth",
+    "search_term": "Axis Short Term",
     "candidates": []
   },
   {
@@ -191,8 +380,12 @@
     "search_term": "ICICI Prudential Balanced Advantage Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 120377,
-        "schemeName": "ICICI Prudential Balanced Advantage Fund - Direct Plan -  Growth",
+        "scheme_code": 120377,
+        "scheme_name": "ICICI Prudential Balanced Advantage Fund - Direct Plan -  Growth",
+        "isin": "INF109K012B0",
+        "category_sub": "Dynamic Asset Allocation or Balanced Advantage",
+        "is_active": true,
+        "relevance": 13,
         "match_score": 0.9152542372881356
       }
     ]
@@ -202,8 +395,12 @@
     "search_term": "HDFC Balanced Advantage Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 118968,
-        "schemeName": "HDFC Balanced Advantage Fund - Growth Plan - Direct Plan",
+        "scheme_code": 118968,
+        "scheme_name": "HDFC Balanced Advantage Fund - Growth Plan - Direct Plan",
+        "isin": "INF179K01WA6",
+        "category_sub": "Dynamic Asset Allocation or Balanced Advantage",
+        "is_active": true,
+        "relevance": 13,
         "match_score": 0.7346938775510204
       }
     ]
@@ -213,13 +410,21 @@
     "search_term": "Edelweiss Balanced Advantage Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 118615,
-        "schemeName": "Edelweiss Balanced Advantage Fund -Direct Plan-Growth Option",
+        "scheme_code": 118615,
+        "scheme_name": "Edelweiss Balanced Advantage Fund -Direct Plan-Growth Option",
+        "isin": "INF754K01BS2",
+        "category_sub": "Dynamic Asset Allocation or Balanced Advantage",
+        "is_active": true,
+        "relevance": 13,
         "match_score": 0.8785046728971962
       },
       {
-        "schemeCode": 140357,
-        "schemeName": "Edelweiss Balanced Advantage Fund - Direct Plan - Growth Option-deactivated",
+        "scheme_code": 140357,
+        "scheme_name": "Edelweiss Balanced Advantage Fund - Direct Plan - Growth Option-deactivated",
+        "isin": "INF843K01KQ8",
+        "category_sub": null,
+        "is_active": false,
+        "relevance": 0,
         "match_score": 0.7704918032786885
       }
     ]
@@ -227,21 +432,99 @@
   {
     "category": "Index Fund",
     "search_term": "UTI Nifty 50 Index Fund Direct Growth",
-    "candidates": []
+    "candidates": [
+      {
+        "scheme_code": 143341,
+        "scheme_name": "UTI Nifty Next 50 Index Fund - Direct Plan - Growth Option",
+        "isin": "INF789FC12T1",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.7789473684210526
+      },
+      {
+        "scheme_code": 153089,
+        "scheme_name": "UTI Nifty Midcap 150 Index Fund - Direct Plan - Growth Option",
+        "isin": "INF789F1AZO5",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.7551020408163265
+      },
+      {
+        "scheme_code": 154197,
+        "scheme_name": "UTI Nifty500 Shariah Index Fund - Direct Plan Growth Option",
+        "isin": "INF789F1AD04",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.75
+      }
+    ]
   },
   {
     "category": "Index Fund",
     "search_term": "HDFC Index Fund Nifty 50 Direct Growth",
-    "candidates": []
+    "candidates": [
+      {
+        "scheme_code": 149288,
+        "scheme_name": "HDFC NIFTY Next 50 Index Fund - Direct Plan - Growth Option",
+        "isin": "INF179KC1BQ9",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.6391752577319587
+      },
+      {
+        "scheme_code": 149107,
+        "scheme_name": "HDFC NIFTY50 Equal weight Index Fund - Direct Plan - Growth Option",
+        "isin": "INF179KC1BM8",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.5961538461538461
+      },
+      {
+        "scheme_code": 151724,
+        "scheme_name": "HDFC NIFTY Midcap 150 Index Fund - Growth Option - Direct Plan",
+        "isin": "INF179KC1GC8",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.52
+      }
+    ]
   },
   {
     "category": "Index Fund",
     "search_term": "ICICI Prudential Nifty 50 Index Fund Direct Growth",
     "candidates": [
       {
-        "schemeCode": 120684,
-        "schemeName": "ICICI Prudential Nifty Next 50 Index Fund - Direct Plan -  Growth",
+        "scheme_code": 153161,
+        "scheme_name": "ICICI Prudential Nifty 500 Index Fund - Direct Plan - Growth",
+        "isin": "INF109KC16Y3",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.9090909090909091
+      },
+      {
+        "scheme_code": 120684,
+        "scheme_name": "ICICI Prudential Nifty Next 50 Index Fund - Direct Plan -  Growth",
+        "isin": "INF109K01Y80",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
         "match_score": 0.8695652173913043
+      },
+      {
+        "scheme_code": 149389,
+        "scheme_name": "ICICI Prudential Nifty Midcap 150 Index Fund - Direct Plan - Growth",
+        "isin": "INF109KC1W58",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.8547008547008547
       }
     ]
   }

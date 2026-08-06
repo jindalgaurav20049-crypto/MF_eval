@@ -274,6 +274,89 @@ project is understanding the code well enough to defend it in an
 interview, not having more code exist. Treat this as a code review
 session, not a merge-and-move-on session.
 
+## Session 4 — Data Source Switch to Tigzig + Ownership Decision
+
+**Date:** 2026-07-26
+
+### What we did
+- Gaurav's decision on PR #2: use it as a design reference only, don't merge
+  or reuse the code directly — build the implementation ourselves so both
+  of us can actually own and defend it.
+- Discovered and live-tested a better data source: **Tigzig's MF NAV API**
+  (`https://api.tigzig.com/mf/v1/`), an alternative to mfapi.in.
+- Switched `scripts/lookup_schemes.py` from mfapi.in to Tigzig.
+
+### Concepts introduced this session
+
+**Comparing data providers on real evidence, not just docs**
+- Live-tested `GET /mf/v1/nav?scheme=118955&since=2020-01-01` — confirmed
+  Tigzig returns NAVs as actual numbers (`712.78`), not strings like
+  mfapi.in (`"77.69770"`). Small thing, but it means no manual type
+  conversion (`float(nav)`) scattered through the ingestion code.
+- Tigzig's NAV endpoint accepts **up to 50 scheme codes in a single call**
+  (`schemes=118955,120468,...`) — our entire 24-fund backfill could be one
+  API call instead of 24 sequential ones. Fewer requests, less code, fewer
+  places for a network error to strike.
+- Tigzig publishes real rate limits (300 req/min/IP on data endpoints) —
+  removed the artificial delay we'd put in defensively for mfapi.in.
+
+**Why "test it live" beats "read the docs and trust it"**
+- We didn't just pick Tigzig because its marketing page sounded better —
+  we made an actual `web_fetch` call to its live endpoint and inspected the
+  real JSON shape before committing the script to it. Docs can describe an
+  aspirational API; a live response is what your code will actually get.
+
+### Interview questions to be able to answer out loud
+1. You're choosing between two APIs that serve the same underlying data —
+   what would you actually test before picking one, beyond reading docs?
+2. Why does a batch endpoint (fetch 50 schemes in one call) matter for a
+   pipeline like this, beyond "fewer lines of code"?
+3. What's the practical cost of an API returning numbers as strings, and
+   where would that cost show up later if unhandled?
+
+### Open questions / decisions to revisit
+- `/mf/v1/search`'s exact response field names weren't independently
+  verified live (only `/mf/v1/nav` was) — `lookup_schemes.py` is written
+  defensively (tries a couple of plausible key names) but this needs
+  confirming and simplifying after the first real local run.
+- Next session: run the updated script, review `resolved_schemes.json`,
+  then write the actual ingestion script using Tigzig's batch NAV endpoint
+  to populate `amc`/`scheme`/`nav_history_daily` — built independently,
+  using PR #2 only as a design reference (e.g. "reuse `analytics_engine`,
+  don't reimplement the math" is worth keeping as a pattern).
+
+### Addendum — the "no candidates" mystery, solved (same session)
+
+Ran the updated Tigzig script — 19/24 funds resolved cleanly, but 5 came
+back empty, and **the exact same 5 failed on both mfapi.in and Tigzig in
+separate runs**. Two independent providers agreeing on "no match" ruled out
+a provider-specific bug — pointed at our search strings instead.
+
+**Root cause, confirmed via research:** real mutual funds get renamed.
+- `Axis Bluechip Fund` → `Axis Large Cap Fund` (effective June 2, 2025)
+- `Axis Long Term Equity Fund` → `Axis ELSS Tax Saver Fund` (effective
+  December 8, 2023 — part of an industry-wide SEBI-driven rename of ELSS
+  fund names)
+
+Both are fixed in `CURATED_FUNDS` now. The other 3 stubborn ones (Kotak
+Emerging Equity, PGIM India Midcap Opportunities, Axis Short Term) got
+simplified search terms rather than a guessed rename — worth checking
+these properly on the next run rather than assuming.
+
+**Why this matters beyond just fixing 5 rows:** this is a real
+data-quality problem the ingestion pipeline will hit again, permanently —
+AMFI/fund-house renames happen regularly (SEBI category standardization,
+AMC mergers like PGIM India's ownership change). A one-time hardcoded
+fund list goes stale; production ingestion should resolve by scheme code
+(stable) wherever possible, not by re-searching fund names each time.
+
+### Interview questions (addendum)
+1. Two different data providers both return empty for the same query —
+   what does that tell you about where the bug likely is?
+2. A fund's official name changes after your system already has data
+   keyed to its old name — how would you design ingestion to be resilient
+   to that, longer-term?
+
 ## Roadmap (living — update as phases complete)
 
 - [ ] **Phase A — Make it real:** ingest real AMFI NAV data, wire worker to
