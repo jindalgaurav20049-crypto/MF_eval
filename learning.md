@@ -360,13 +360,77 @@ fund list goes stale; production ingestion should resolve by scheme code
    keyed to its old name — how would you design ingestion to be resilient
    to that, longer-term?
 
+## Session 5 — Full Product Vision & Scope
+
+**Date:** 2026-08-06
+
+### What we did
+- Stepped back from implementation to define the real product scope, since
+  "resume-ready" turned out to mean something bigger than a demo pipeline.
+
+### The full vision (stated by Shristi)
+A genuine multi-user product, not a portfolio demo:
+- User profiles / accounts (not yet in the schema — real net-new work)
+- Saved favorite funds (watchlist — already modeled in the DB)
+- Daily-refreshed data (the worker + ingestion pipeline we're building)
+- Evaluation / recommendation of what's good to invest in
+- Coverage of *all* existing India mutual funds, not just the curated 24
+- Fund comparison
+- A portfolio overlap detector — flag when different funds someone holds
+  are secretly invested in the same underlying stock
+- A frontend with real visual personality/branding (colors TBD later)
+
+### Concepts introduced this session
+
+**NAV data vs. holdings data are two different things**
+- NAV tells you a fund's *value* went up or down.
+- Holdings tell you *what the fund actually owns* (e.g. "8% in HDFC Bank").
+- Overlap detection needs holdings, not NAV — a fund could have unrelated
+  NAV movement patterns and still hold the same underlying stock as
+  another fund. This is a genuinely separate data dimension, refreshed on
+  a different cadence (funds disclose holdings monthly, not daily),
+  requiring new schema: a `stock` table and a `scheme_holding` table
+  (fund → stock → weight%), not just an extension of what exists.
+
+**Scoping decision: holdings/overlap detection deprioritized to backlog**
+- It's the single highest-risk, highest-complexity piece (new data
+  source, new refresh cadence, cross-fund stock identity matching).
+  Building the rest of the product first — and getting it solid — before
+  adding this, rather than letting the hardest feature block everything
+  else. A legitimate prioritization call, worth being able to explain as
+  a deliberate trade-off in an interview, not an omission.
+
+### Interview questions to be able to answer out loud
+1. Why does detecting portfolio overlap across funds require different
+   data than computing CAGR/Sharpe/Drawdown for a single fund?
+2. You've scoped a feature that adds real complexity and a new data
+   dependency — how do you decide whether to build it now or defer it?
+3. What's the difference in refresh cadence between price data and
+   holdings data for a mutual fund, and why does that matter for how
+   you'd design the ingestion pipeline?
+
+### Open questions / decisions to revisit
+- Tigzig's docs reference a portfolio holdings/composition pipeline
+  separate from their NAV API — not yet live-tested. Worth verifying
+  when the backlog item is picked back up, so the data-source decision
+  for holdings isn't made blind the way NAV almost was.
+- Re-scoped roadmap below reflects the full vision minus holdings (see
+  backlog line).
+
 ## Roadmap (living — update as phases complete)
 
-- [ ] **Phase A — Make it real:** ingest real AMFI NAV data, wire worker to
-      compute real metrics and save them, make API read from DB
+- [ ] **Phase A — Core NAV pipeline:** ingest real NAV data for the 24
+      curated funds, wire worker to compute real metrics and save them,
+      make API read from DB *(in progress)*
 - [ ] **Phase B — Make it correct:** handle short-history funds, missing
       trading days, fund renames/mergers; add integration tests
-- [ ] **Phase C — Make it defensible:** auth for watchlist/portfolio,
-      Redis caching strategy, CI pipeline (GitHub Actions)
-- [ ] **Phase D — Make it presentable:** live deployment, one fully
-      end-to-end polished feature (likely Compare)
+- [ ] **Phase C — Real user accounts:** users table, auth, watchlist/
+      portfolio actually tied to logged-in users
+- [ ] **Phase D — Full India MF universe ingestion:** expand beyond the
+      curated 24 to the full ~8,600 active schemes
+- [ ] **Phase E — Recommendation + comparison engine**
+- [ ] **Phase F — Frontend design system + real UI build-out**
+- [ ] **Phase G — Deployment**
+- [ ] **Backlog — Holdings/composition data + overlap detector:**
+      deliberately deprioritized (see Session 5) — revisit once the core
+      product is solid
