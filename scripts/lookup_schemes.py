@@ -50,13 +50,13 @@ CURATED_FUNDS: list[dict[str, str]] = [
     # Large Cap
     {"category": "Large Cap", "amc": "Axis Mutual Fund", "search": "Axis Large Cap Fund Direct Growth"},  # renamed from Axis Bluechip Fund, June 2025
     {"category": "Large Cap", "amc": "Mirae Asset Mutual Fund", "search": "Mirae Asset Large Cap Fund Direct Growth"},
-    {"category": "Large Cap", "amc": "ICICI Prudential Mutual Fund", "search": "ICICI Prudential Bluechip Fund Direct Growth"},
+    {"category": "Large Cap", "amc": "ICICI Prudential Mutual Fund", "search": "ICICI Prudential Large Cap Fund Direct Growth"},  # renamed from ICICI Prudential Bluechip Fund, June 2025
     # Flexi Cap
     {"category": "Flexi Cap", "amc": "PPFAS Mutual Fund", "search": "Parag Parikh Flexi Cap Fund Direct Growth"},
     {"category": "Flexi Cap", "amc": "HDFC Mutual Fund", "search": "HDFC Flexi Cap Fund Direct Growth"},
     {"category": "Flexi Cap", "amc": "Kotak Mahindra Mutual Fund", "search": "Kotak Flexicap Fund Direct Growth"},
     # Mid Cap
-    {"category": "Mid Cap", "amc": "Kotak Mahindra Mutual Fund", "search": "Kotak Emerging Equity"},  # simplified — "...Fund Direct Growth" returned no matches, worth rechecking for a rename too
+    {"category": "Mid Cap", "amc": "Kotak Mahindra Mutual Fund", "search": "Kotak Midcap Fund Direct Growth"},  # renamed from Kotak Emerging Equity Fund — confirmed via kotakmf.com, same ISIN INF174K01LT0 throughout
     {"category": "Mid Cap", "amc": "Axis Mutual Fund", "search": "Axis Midcap Fund Direct Growth"},
     {"category": "Mid Cap", "amc": "PGIM India Mutual Fund", "search": "PGIM India Midcap Fund Direct Growth"},  # renamed from PGIM India Midcap Opportunities Fund
     # Small Cap
@@ -76,9 +76,9 @@ CURATED_FUNDS: list[dict[str, str]] = [
     {"category": "Hybrid - Balanced Advantage", "amc": "HDFC Mutual Fund", "search": "HDFC Balanced Advantage Fund Direct Growth"},
     {"category": "Hybrid - Balanced Advantage", "amc": "Edelweiss Mutual Fund", "search": "Edelweiss Balanced Advantage Fund Direct Growth"},
     # Index Fund (useful as an in-app benchmark)
-    {"category": "Index Fund", "amc": "UTI Mutual Fund", "search": "UTI Nifty 50 Index Fund Direct Growth"},
-    {"category": "Index Fund", "amc": "HDFC Mutual Fund", "search": "HDFC Index Fund Nifty 50 Direct Growth"},
-    {"category": "Index Fund", "amc": "ICICI Prudential Mutual Fund", "search": "ICICI Prudential Nifty 50 Index Fund Direct Growth"},
+    {"category": "Index Fund", "amc": "UTI Mutual Fund", "search": "UTI Nifty 50 Index Fund"},  # previous fix (dropping "50") was wrong — current branding on UTI's own site still uses "50"; dropped "Direct Growth" instead this time
+    {"category": "Index Fund", "amc": "HDFC Mutual Fund", "search": "HDFC NIFTY 50 Index Fund Direct Growth"},  # reordered + capitalized to match Tigzig's naming convention for this AMC's other Nifty funds
+    {"category": "Index Fund", "amc": "ICICI Prudential Mutual Fund", "search": "ICICI Prudential Nifty 50 Index Fund"},  # dropped "Direct Growth" — same fix pattern as HDFC/UTI above, worth confirming next run
 ]
 
 
@@ -113,9 +113,17 @@ def search_tigzig(query: str) -> list[dict]:
         return []
 
 
-def rank_candidates(search_term: str, candidates: list[dict], top_n: int = 3) -> list[dict]:
+def rank_candidates(search_term: str, candidates: list[dict], top_n: int = 5) -> list[dict]:
     """Rank Tigzig's raw results by string similarity to our search term,
-    so the human reviewer sees the most likely match first."""
+    so the human reviewer sees the most likely match first.
+
+    top_n=5, not 3: Session 6 found ICICI Prudential's plain "Nifty 50
+    Index Fund" scored below its "Nifty 500" and "Nifty Next 50" siblings
+    (which share almost all the same words) and got cut off at top_n=3,
+    even though it was a real match sitting just outside the window. A
+    wider window costs nothing (the human still has to actually pick, per
+    confirm_schemes.py) but avoids silently hiding a correct answer.
+    """
     target = _normalize(search_term)
     scored = [
         {
@@ -130,9 +138,39 @@ def rank_candidates(search_term: str, candidates: list[dict], top_n: int = 3) ->
     return scored[:top_n]
 
 
+def load_existing_confirmations() -> dict[tuple[str, str], dict]:
+    """Load any fully-confirmed entries already saved, keyed by
+    (category, amc) — so re-running this script (e.g. to fix one fund's
+    search term) doesn't wipe out confirmations already done for others.
+    Returns the whole entry (not just the code) so its candidates list —
+    needed by ingest_nav_data.py to look up scheme_name/isin — survives
+    too. Returns {} if no file exists yet."""
+    if not OUTPUT_PATH.exists():
+        return {}
+    previous = json.loads(OUTPUT_PATH.read_text())
+    return {
+        (entry["category"], entry["amc"]): entry
+        for entry in previous
+        if entry.get("confirmed_scheme_code")
+    }
+
+
 def main() -> None:
+    already_confirmed = load_existing_confirmations()
+    if already_confirmed:
+        print(f"Preserving {len(already_confirmed)} existing confirmations from a previous run.\n")
+
     results = []
     for fund in CURATED_FUNDS:
+        key = (fund["category"], fund["amc"])
+        if key in already_confirmed:
+            # Already confirmed by a human in a previous run — carry the
+            # whole entry forward unchanged, including its candidates
+            # list (ingest_nav_data.py needs it to look up scheme_name).
+            print(f"Skipping (already confirmed): {fund['search']}")
+            results.append(already_confirmed[key])
+            continue
+
         print(f"Looking up: {fund['search']}")
         raw = search_tigzig(fund["search"])
         top = rank_candidates(fund["search"], raw)

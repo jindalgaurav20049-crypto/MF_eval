@@ -150,47 +150,88 @@
   {
     "category": "Mid Cap",
     "amc": "Kotak Mahindra Mutual Fund",
-    "search_term": "Kotak Emerging Equity",
+    "search_term": "Kotak Midcap Fund Direct Growth",
     "candidates": [
       {
-        "scheme_code": 106441,
-        "scheme_name": "Kotak Global Emerging Market Overseas Equity Omni FOF- Growth",
-        "isin": "INF174K01DV3",
+        "scheme_code": 119775,
+        "scheme_name": "Kotak Midcap Fund - Direct Plan - Growth",
+        "isin": "INF174K01LT0",
         "isin2": null,
-        "category_sub": "FoF Overseas",
+        "category_sub": "Mid Cap Fund",
         "is_active": true,
-        "relevance": 3,
-        "match_score": 0.5121951219512195
+        "relevance": 18,
+        "match_score": 0.8732394366197183
       },
       {
-        "scheme_code": 119779,
-        "scheme_name": "Kotak Global Emerging Market overseas Equity Omni FOF - Growth - Direct",
-        "isin": "INF174K01LW4",
+        "scheme_code": 120158,
+        "scheme_name": "Kotak Large & Midcap Fund - Direct- Growth",
+        "isin": "INF174K01LF9",
         "isin2": null,
-        "category_sub": "FoF Overseas",
+        "category_sub": "Large & Mid Cap Fund",
         "is_active": true,
-        "relevance": 3,
-        "match_score": 0.45652173913043476
+        "relevance": 18,
+        "match_score": 0.8493150684931506
       },
       {
-        "scheme_code": 106442,
-        "scheme_name": "Kotak Global Emerging Market Overseas Equity Omni FOF - Payout of Income Distribution cum capital withdrawal option",
-        "isin": "INF174K01DX9",
-        "isin2": "INF174K01DW1",
-        "category_sub": "FoF Overseas",
+        "scheme_code": 153401,
+        "scheme_name": "KOTAK NIFTY MIDCAP 150 INDEX FUND-DIRECT PLAN-GROWTH",
+        "isin": "INF174KA1VQ4",
+        "isin2": null,
+        "category_sub": "Index Funds",
         "is_active": true,
-        "relevance": 3,
-        "match_score": 0.3088235294117647
+        "relevance": 13,
+        "match_score": 0.7469879518072289
+      },
+      {
+        "scheme_code": 152767,
+        "scheme_name": "KOTAK NIFTY MIDCAP 50 INDEX FUND-DIRECT PLAN- GROWTH",
+        "isin": "INF174KA1SR8",
+        "isin2": null,
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.7469879518072289
+      },
+      {
+        "scheme_code": 152916,
+        "scheme_name": "Kotak Nifty Midcap 150 Momentum 50 Index Fund-Direct Plan-Growth",
+        "isin": "INF174KA1TM7",
+        "isin2": null,
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.6526315789473685
       }
     ],
-    "confirmed_scheme_code": null
+    "confirmed_scheme_code": "119775"
   },
   {
     "category": "Mid Cap",
     "amc": "Axis Mutual Fund",
     "search_term": "Axis Midcap Fund Direct Growth",
-    "candidates": [],
-    "confirmed_scheme_code": null
+    "candidates": [
+      {
+        "scheme_code": 120505,
+        "scheme_name": "Axis Midcap Fund - Direct Plan - Growth",
+        "isin": "INF846K01EH3",
+        "isin2": null,
+        "category_sub": "Mid Cap Fund",
+        "is_active": true,
+        "relevance": 18,
+        "match_score": 0.8695652173913043
+      },
+      {
+        "scheme_code": 149936,
+        "scheme_name": "Axis Nifty Midcap 50 Index Fund - Direct Plan - Growth Option",
+        "isin": "INF846K019H0",
+        "isin2": null,
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.6593406593406593
+      }
+    ],
+    "confirmed_scheme_code": "120505"
   },
   {
     "category": "Mid Cap",
@@ -529,8 +570,48 @@
   {
     "category": "Index Fund",
     "amc": "UTI Mutual Fund",
-    "search_term": "UTI Nifty 50 Index Fund Direct Growth",
+    "search_term": "UTI Nifty 50 Index Fund",
     "candidates": [
+      {
+        "scheme_code": 120717,
+        "scheme_name": "UTI Nifty 50 Index Fund - Direct Plan - IDCW",
+        "isin": "INF789F01WY2",
+        "isin2": "INF789F01WZ9",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 21,
+        "match_score": 0.6865671641791045
+      },
+      {
+        "scheme_code": 100823,
+        "scheme_name": "UTI Nifty 50 Index Fund - Regular Plan - IDCW",
+        "isin": "INF789F01JL6",
+        "isin2": "INF789F01JM4",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 21,
+        "match_score": 0.6764705882352942
+      },
+      {
+        "scheme_code": 120716,
+        "scheme_name": "UTI Nifty 50 Index Fund - Growth Option- Direct",
+        "isin": "INF789F01XA0",
+        "isin2": null,
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 26,
+        "match_score": 0.6571428571428571
+      },
+      {
+        "scheme_code": 100822,
+        "scheme_name": "UTI Nifty 50 Index Fund - Regular Plan - Growth Option",
+        "isin": "INF789F01JN2",
+        "isin2": null,
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 21,
+        "match_score": 0.5974025974025974
+      },
       {
         "scheme_code": 143341,
         "scheme_name": "UTI Nifty Next 50 Index Fund - Direct Plan - Growth Option",
@@ -539,35 +620,15 @@
         "category_sub": "Index Funds",
         "is_active": true,
         "relevance": 13,
-        "match_score": 0.7789473684210526
-      },
-      {
-        "scheme_code": 153089,
-        "scheme_name": "UTI Nifty Midcap 150 Index Fund - Direct Plan - Growth Option",
-        "isin": "INF789F1AZO5",
-        "isin2": null,
-        "category_sub": "Index Funds",
-        "is_active": true,
-        "relevance": 13,
-        "match_score": 0.7551020408163265
-      },
-      {
-        "scheme_code": 154197,
-        "scheme_name": "UTI Nifty500 Shariah Index Fund - Direct Plan Growth Option",
-        "isin": "INF789F1AD04",
-        "isin2": null,
-        "category_sub": "Index Funds",
-        "is_active": true,
-        "relevance": 13,
-        "match_score": 0.75
+        "match_score": 0.5679012345679012
       }
     ],
-    "confirmed_scheme_code": null
+    "confirmed_scheme_code": "120716"
   },
   {
     "category": "Index Fund",
     "amc": "HDFC Mutual Fund",
-    "search_term": "HDFC Index Fund Nifty 50 Direct Growth",
+    "search_term": "HDFC NIFTY 50 Index Fund Direct Growth",
     "candidates": [
       {
         "scheme_code": 149288,
@@ -577,7 +638,7 @@
         "category_sub": "Index Funds",
         "is_active": true,
         "relevance": 13,
-        "match_score": 0.6391752577319587
+        "match_score": 0.7835051546391752
       },
       {
         "scheme_code": 149107,
@@ -587,7 +648,17 @@
         "category_sub": "Index Funds",
         "is_active": true,
         "relevance": 13,
-        "match_score": 0.5961538461538461
+        "match_score": 0.7115384615384616
+      },
+      {
+        "scheme_code": 152889,
+        "scheme_name": "HDFC NIFTY LargeMidcap 250 Index Fund - Growth Option - Direct",
+        "isin": "INF179KC1IQ4",
+        "isin2": null,
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.64
       },
       {
         "scheme_code": 151724,
@@ -597,47 +668,77 @@
         "category_sub": "Index Funds",
         "is_active": true,
         "relevance": 13,
-        "match_score": 0.52
+        "match_score": 0.64
+      },
+      {
+        "scheme_code": 151727,
+        "scheme_name": "HDFC NIFTY Smallcap 250 Index Fund - Growth Option - Direct Plan",
+        "isin": "INF179KC1GE4",
+        "isin2": null,
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.6274509803921569
       }
     ],
-    "confirmed_scheme_code": null
+    "confirmed_scheme_code": "149107"
   },
   {
     "category": "Index Fund",
     "amc": "ICICI Prudential Mutual Fund",
-    "search_term": "ICICI Prudential Nifty 50 Index Fund Direct Growth",
+    "search_term": "ICICI Prudential Nifty 50 Index Fund",
     "candidates": [
       {
-        "scheme_code": 153161,
-        "scheme_name": "ICICI Prudential Nifty 500 Index Fund - Direct Plan - Growth",
-        "isin": "INF109KC16Y3",
-        "isin2": null,
+        "scheme_code": 153160,
+        "scheme_name": "ICICI Prudential Nifty 500 Index Fund - IDCW",
+        "isin": "INF109KC15Y5",
+        "isin2": "INF109KC14Y8",
         "category_sub": "Index Funds",
         "is_active": true,
         "relevance": 13,
-        "match_score": 0.9090909090909091
+        "match_score": 0.9
       },
       {
-        "scheme_code": 120684,
-        "scheme_name": "ICICI Prudential Nifty Next 50 Index Fund - Direct Plan -  Growth",
-        "isin": "INF109K01Y80",
+        "scheme_code": 153162,
+        "scheme_name": "ICICI Prudential Nifty 500 Index Fund - Growth",
+        "isin": "INF109KC13Y0",
         "isin2": null,
         "category_sub": "Index Funds",
         "is_active": true,
         "relevance": 13,
-        "match_score": 0.8695652173913043
+        "match_score": 0.8780487804878049
       },
       {
-        "scheme_code": 149389,
-        "scheme_name": "ICICI Prudential Nifty Midcap 150 Index Fund - Direct Plan - Growth",
-        "isin": "INF109KC1W58",
+        "scheme_code": 112958,
+        "scheme_name": "ICICI Prudential Nifty Next 50 Index Fund -IDCW",
+        "isin": "INF109K01PR1",
+        "isin2": "INF109K01IE4",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 13,
+        "match_score": 0.8674698795180723
+      },
+      {
+        "scheme_code": 135390,
+        "scheme_name": "ICICI Prudential Nifty 50 Index Fund - IDCW Option",
+        "isin": "INF109KB1NN7",
+        "isin2": "INF109KB1NO5",
+        "category_sub": "Index Funds",
+        "is_active": true,
+        "relevance": 21,
+        "match_score": 0.8372093023255814
+      },
+      {
+        "scheme_code": 112957,
+        "scheme_name": "ICICI Prudential Nifty Next 50 Index Fund - Growth",
+        "isin": "INF109K01IF1",
         "isin2": null,
         "category_sub": "Index Funds",
         "is_active": true,
         "relevance": 13,
-        "match_score": 0.8547008547008547
+        "match_score": 0.8372093023255814
       }
     ],
-    "confirmed_scheme_code": null
+    "confirmed_scheme_code": "153162"
   }
 ]
