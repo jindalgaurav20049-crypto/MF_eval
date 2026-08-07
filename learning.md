@@ -506,6 +506,91 @@ python scripts/ingest_nav_data.py
   now, but worth sourcing properly before this goes further (e.g. Tigzig's
   scheme master / bulk download may have it).
 
+### Addendum — first real run: a milestone, and a caught bug (same session)
+
+**Milestone:** ran the real pipeline end to end for the first time.
+Docker → Postgres → Alembic migrations → chunked Tigzig fetch → real
+insert. **70,825 real NAV rows landed in the database.** Along the way,
+fixed two real environment issues (not code bugs): Tigzig's actual batch
+response nests `schemes` as a **list**, not a dict keyed by code (fixed
+`fetch_batch_nav` to normalize either shape); and fetching full multi-year
+history for 24 funds in one request timed out, fixed by chunking into
+groups of 6 with retries rather than one giant call.
+
+**The bug, caught by reading the output carefully, not by a test:**
+7 of the 24 ingested funds were the **wrong fund entirely** — not close
+matches, actually different funds:
+
+| Wanted | Actually got | Why |
+|---|---|---|
+| ICICI Prudential Bluechip Fund | ICICI Prudential **US** Bluechip Equity Fund | different country/asset class (also: real rename to "ICICI Prudential Large Cap Fund", confirmed June 16 2025 — same industry-wide pattern as Sessions 4) |
+| Kotak Emerging Equity Fund | Kotak Global Emerging Market **Overseas** Equity FOF | different fund category entirely |
+| Axis Short Duration Fund | Axis **Ultra** Short Duration Fund | different debt sub-category |
+| UTI Nifty 50 Index Fund | UTI Nifty **Next** 50 Index Fund | tracks different 50 companies |
+| HDFC Index Fund Nifty 50 | HDFC NIFTY **Next 50** Index Fund | same issue |
+| ICICI Prudential Nifty 50 Index Fund | ICICI Prudential Nifty **500** Index Fund | 50 stocks vs 500 stocks |
+| Quant Tax Plan | **Quantum** ELSS Tax Saver Fund | **two entirely different, unrelated AMCs** |
+
+**Root cause:** the auto-pick-top-candidate approach trusted text
+similarity (`difflib`) too much. Names that share most of their words but
+differ in one meaningful qualifier ("Next", "500", "Ultra", "US",
+"Quantum" vs "Quant") can out-score the actually-correct fund. The script
+had a comment saying "human picks the right one, do not auto-accept" —
+but nothing *enforced* that. A comment isn't a safeguard.
+
+### The fix: an actual enforced checkpoint, not a comment
+- `lookup_schemes.py` now writes `"confirmed_scheme_code": null` on every
+  entry — deliberately never auto-filled, even when the top candidate
+  looks obviously right.
+- `ingest_nav_data.py`'s `load_confirmed_funds()` now **refuses** to use
+  any entry where `confirmed_scheme_code` is still null, or where it
+  doesn't match one of that entry's real candidates (catches typos too).
+  It prints exactly what got skipped and why.
+- New: `scripts/confirm_schemes.py` — an interactive tool that shows each
+  fund's real candidates one at a time and makes a human actually pick.
+  Saves after every single choice, safe to stop and resume.
+
+### Concepts introduced this session
+
+**A code comment is not a control** — "do not auto-accept" as a comment
+next to code that *does* auto-accept is worse than no comment at all,
+because it creates false confidence that the risk was handled. If a step
+genuinely requires a human decision, the code needs to structurally
+refuse to proceed without one (a null check that blocks execution), not
+just say so in a docstring.
+
+**Text similarity ranking has a specific blind spot: differentiating
+qualifiers.** Two names sharing 90% of their words can still refer to
+completely different products if the other 10% is the part that matters
+("Next", "500", "Ultra", "US"). This is a general lesson beyond mutual
+funds — any fuzzy-matching pipeline (product catalogs, entity resolution,
+deduplication) has this exact failure mode.
+
+**Idempotent pipelines make mistakes cheap to fix.** Because ingestion
+checks existing `(scheme, date)` pairs before inserting, and because this
+is local dev data, fixing this bug is just: wipe the dev DB, fix the
+data, re-run. No delicate surgical row-by-row correction needed. Designing
+for cheap re-runs earlier paid off immediately here.
+
+### Interview questions to be able to answer out loud
+1. Walk me through a real bug you caught in this project — what was it,
+   how did you find it, and how did you fix the root cause vs. the symptom?
+2. Why is "the code has a comment saying a human should check this" not
+   the same as actually requiring human review?
+3. What's a blind spot of similarity-based fuzzy matching that exact-match
+   or keyword search wouldn't have, and vice versa?
+4. Why does making a pipeline idempotent (safe to re-run) matter beyond
+   just "convenience" — how did it directly help recover from this bug?
+
+### Next session
+1. Wipe the dev DB (`docker-compose down -v` → `up -d` → `alembic upgrade
+   head`) — cheap, since it's local dev data.
+2. Re-run `lookup_schemes.py` to regenerate `resolved_schemes.json` with
+   the new `confirmed_scheme_code` field.
+3. Run `scripts/confirm_schemes.py` and actually confirm all 24 by hand.
+4. Re-run `ingest_nav_data.py` — now hard-gated, will refuse anything
+   unconfirmed.
+
 ## Roadmap (living — update as phases complete)
 
 - [ ] **Phase A — Core NAV pipeline:** ingest real NAV data for the 24

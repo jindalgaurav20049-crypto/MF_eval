@@ -24,7 +24,8 @@
         "relevance": 18,
         "match_score": 0.8148148148148148
       }
-    ]
+    ],
+    "confirmed_scheme_code": "120465"
   },
   {
     "category": "Large Cap",
@@ -61,7 +62,8 @@
         "relevance": 13,
         "match_score": 0.7289719626168224
       }
-    ]
+    ],
+    "confirmed_scheme_code": "118825"
   },
   {
     "category": "Large Cap",
@@ -88,7 +90,8 @@
         "relevance": 18,
         "match_score": 0.7096774193548387
       }
-    ]
+    ],
+    "confirmed_scheme_code": "120586"
   },
   {
     "category": "Flexi Cap",
@@ -105,7 +108,8 @@
         "relevance": 18,
         "match_score": 0.9010989010989011
       }
-    ]
+    ],
+    "confirmed_scheme_code": "122639"
   },
   {
     "category": "Flexi Cap",
@@ -122,7 +126,8 @@
         "relevance": 18,
         "match_score": 0.6585365853658537
       }
-    ]
+    ],
+    "confirmed_scheme_code": "118955"
   },
   {
     "category": "Flexi Cap",
@@ -139,7 +144,8 @@
         "relevance": 18,
         "match_score": 0.7714285714285715
       }
-    ]
+    ],
+    "confirmed_scheme_code": "120166"
   },
   {
     "category": "Mid Cap",
@@ -176,34 +182,15 @@
         "relevance": 3,
         "match_score": 0.3088235294117647
       }
-    ]
+    ],
+    "confirmed_scheme_code": null
   },
   {
     "category": "Mid Cap",
     "amc": "Axis Mutual Fund",
     "search_term": "Axis Midcap Fund Direct Growth",
-    "candidates": [
-      {
-        "scheme_code": 120505,
-        "scheme_name": "Axis Midcap Fund - Direct Plan - Growth",
-        "isin": "INF846K01EH3",
-        "isin2": null,
-        "category_sub": "Mid Cap Fund",
-        "is_active": true,
-        "relevance": 18,
-        "match_score": 0.8695652173913043
-      },
-      {
-        "scheme_code": 149936,
-        "scheme_name": "Axis Nifty Midcap 50 Index Fund - Direct Plan - Growth Option",
-        "isin": "INF846K019H0",
-        "isin2": null,
-        "category_sub": "Index Funds",
-        "is_active": true,
-        "relevance": 13,
-        "match_score": 0.6593406593406593
-      }
-    ]
+    "candidates": [],
+    "confirmed_scheme_code": null
   },
   {
     "category": "Mid Cap",
@@ -230,7 +217,8 @@
         "relevance": 13,
         "match_score": 0.7346938775510204
       }
-    ]
+    ],
+    "confirmed_scheme_code": "125307"
   },
   {
     "category": "Small Cap",
@@ -267,7 +255,8 @@
         "relevance": 13,
         "match_score": 0.7079646017699115
       }
-    ]
+    ],
+    "confirmed_scheme_code": "118778"
   },
   {
     "category": "Small Cap",
@@ -294,7 +283,8 @@
         "relevance": 13,
         "match_score": 0.7045454545454546
       }
-    ]
+    ],
+    "confirmed_scheme_code": "125497"
   },
   {
     "category": "Small Cap",
@@ -321,7 +311,8 @@
         "relevance": 13,
         "match_score": 0.6666666666666666
       }
-    ]
+    ],
+    "confirmed_scheme_code": "125354"
   },
   {
     "category": "ELSS",
@@ -338,7 +329,8 @@
         "relevance": 18,
         "match_score": 0.8260869565217391
       }
-    ]
+    ],
+    "confirmed_scheme_code": "120503"
   },
   {
     "category": "ELSS",
@@ -355,7 +347,8 @@
         "relevance": 8,
         "match_score": 0.851063829787234
       }
-    ]
+    ],
+    "confirmed_scheme_code": "135781"
   },
   {
     "category": "ELSS",
@@ -382,7 +375,8 @@
         "relevance": 8,
         "match_score": 0.4819277108433735
       }
-    ]
+    ],
+    "confirmed_scheme_code": "120847"
   },
   {
     "category": "Debt Short Duration",
@@ -399,7 +393,8 @@
         "relevance": 13,
         "match_score": 0.6947368421052632
       }
-    ]
+    ],
+    "confirmed_scheme_code": "119016"
   },
   {
     "category": "Debt Short Duration",
@@ -436,7 +431,8 @@
         "relevance": 13,
         "match_score": 0.8518518518518519
       }
-    ]
+    ],
+    "confirmed_scheme_code": "120754"
   },
   {
     "category": "Debt Short Duration",
@@ -463,7 +459,8 @@
         "relevance": 13,
         "match_score": 0.8260869565217391
       }
-    ]
+    ],
+    "confirmed_scheme_code": "120510"
   },
   {
     "category": "Hybrid - Balanced Advantage",
@@ -480,7 +477,8 @@
         "relevance": 13,
         "match_score": 0.9152542372881356
       }
-    ]
+    ],
+    "confirmed_scheme_code": "120377"
   },
   {
     "category": "Hybrid - Balanced Advantage",
@@ -497,7 +495,8 @@
         "relevance": 13,
         "match_score": 0.7346938775510204
       }
-    ]
+    ],
+    "confirmed_scheme_code": "118968"
   },
   {
     "category": "Hybrid - Balanced Advantage",
@@ -524,7 +523,8 @@
         "relevance": 0,
         "match_score": 0.7704918032786885
       }
-    ]
+    ],
+    "confirmed_scheme_code": "118615"
   },
   {
     "category": "Index Fund",
@@ -561,7 +561,8 @@
         "relevance": 13,
         "match_score": 0.75
       }
-    ]
+    ],
+    "confirmed_scheme_code": null
   },
   {
     "category": "Index Fund",
@@ -598,7 +599,8 @@
         "relevance": 13,
         "match_score": 0.52
       }
-    ]
+    ],
+    "confirmed_scheme_code": null
   },
   {
     "category": "Index Fund",
@@ -635,6 +637,7 @@
         "relevance": 13,
         "match_score": 0.8547008547008547
       }
-    ]
+    ],
+    "confirmed_scheme_code": null
   }
 ]

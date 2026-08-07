@@ -142,7 +142,16 @@ def main() -> None:
                 "category": fund["category"],
                 "amc": fund["amc"],
                 "search_term": fund["search"],
-                "candidates": top,  # human picks the right one; do not auto-accept
+                "candidates": top,
+                # Deliberately null, even when top[0] looks right. Session 6
+                # found 7/24 auto-picked top candidates were the WRONG fund
+                # entirely (e.g. "Quant Tax Plan" auto-matched "Quantum ELSS
+                # Tax Saver Fund" — a different AMC). ingest_nav_data.py
+                # refuses to use any entry where this is still null — a human
+                # must copy the correct scheme_code here after checking it's
+                # actually the right fund, not just the highest text-similarity
+                # score.
+                "confirmed_scheme_code": None,
             }
         )
 
@@ -153,8 +162,9 @@ def main() -> None:
 
     OUTPUT_PATH.write_text(json.dumps(results, indent=2))
     print(f"\nWrote {len(results)} entries to {OUTPUT_PATH}")
-    print("Next: open the file, confirm each match by eye, and drop any")
-    print("wrong/ambiguous ones into a follow-up manual-lookup pass.")
+    print("Next: open the file. For EACH entry, check the candidates against")
+    print("the fund's real name/category, then set confirmed_scheme_code to")
+    print("the correct one. ingest_nav_data.py will skip any entry left null.")
 
 
 if __name__ == "__main__":

@@ -51,49 +51,79 @@ from app.db.models import AMC, NAVHistoryDaily, Scheme  # noqa: E402
 
 RESOLVED_SCHEMES_PATH = Path(__file__).parent / "resolved_schemes.json"
 TIGZIG_NAV_URL = "https://api.tigzig.com/mf/v1/nav"
-BATCH_SIZE = 50  # Tigzig's documented max identifiers per /nav call
+BATCH_CHUNK_SIZE = 6  # smaller than Tigzig's max (50) — a single request for
+# all 24 funds' full multi-year history timed out in practice; chunking
+# trades a few more requests for each one being fast and reliable
+NAV_REQUEST_TIMEOUT = 45
+MAX_RETRIES = 2
 
 
 def load_confirmed_funds() -> list[dict]:
-    """Load resolved_schemes.json and take the top-ranked candidate per
-    fund as the confirmed pick. lookup_schemes.py already sorted
-    candidates by match score and a human reviewed the 24/24 clean
-    resolution in Session 4 — if you haven't actually eyeballed
-    resolved_schemes.json yourself yet, do that before trusting this."""
+    """Load resolved_schemes.json and use ONLY entries a human has actually
+    confirmed — entry["confirmed_scheme_code"] must be manually set to a
+    real scheme_code from that entry's candidates (or elsewhere), not left
+    null. This is a hard gate, not a suggestion: a comment alone ("human
+    picks the right one") didn't stop 7/24 wrong funds from getting
+    ingested in Session 6 (e.g. "Quant Tax Plan" auto-matched "Quantum
+    ELSS Tax Saver Fund" — text-similarity ranking can't tell two
+    different AMCs with similar names apart; only a human checking the
+    real fund can).
+    """
     raw = json.loads(RESOLVED_SCHEMES_PATH.read_text())
     confirmed = []
+    unconfirmed_count = 0
     for entry in raw:
-        if not entry["candidates"]:
-            print(f"  ! skipping {entry['search_term']!r} — no candidates to pick from")
+        code = entry.get("confirmed_scheme_code")
+        if not code:
+            unconfirmed_count += 1
+            names = [c.get("scheme_name") for c in entry.get("candidates", [])]
+            print(f"  ! SKIPPING (not confirmed): {entry['search_term']!r} — candidates were: {names}")
             continue
-        top = entry["candidates"][0]
+        # Find the matching candidate to pull its scheme_name/isin — the
+        # confirmed code must actually be one of the returned candidates,
+        # not a typo'd/invented one.
+        matched = next((c for c in entry["candidates"] if str(c["scheme_code"]) == str(code)), None)
+        if matched is None:
+            print(f"  ! SKIPPING: confirmed_scheme_code {code!r} for {entry['search_term']!r} "
+                  f"doesn't match any of its candidates — check for a typo")
+            continue
         confirmed.append(
             {
                 "amc_name": entry["amc"],
                 "category": entry["category"],
-                "scheme_code": str(top["scheme_code"]),
-                "scheme_name": top["scheme_name"],
-                "isin": top.get("isin"),
+                "scheme_code": str(code),
+                "scheme_name": matched["scheme_name"],
+                "isin": matched.get("isin"),
             }
         )
+
+    if unconfirmed_count:
+        print(f"\n{unconfirmed_count} entries skipped — not yet confirmed. "
+              f"Edit {RESOLVED_SCHEMES_PATH.name} and set confirmed_scheme_code for each.\n")
     return confirmed
 
 
-def fetch_batch_nav(scheme_codes: list[str]) -> dict:
-    """Call Tigzig's batch NAV endpoint and normalize the response into
-    {"schemes": {scheme_code_str: payload_dict}, "not_found": [...]}
-    regardless of the exact shape Tigzig returns.
-
-    Confirmed by a real run: the top-level response has a "schemes" key,
-    but its value is a LIST of per-scheme objects (each containing its
-    own scheme_code field), not a dict keyed by code as first assumed.
-    This function now handles both shapes so it doesn't break again if
-    Tigzig's exact format shifts slightly.
-    """
+def _fetch_one_chunk(scheme_codes: list[str]) -> dict:
+    """Fetch NAV for a small chunk of scheme codes, retrying on timeout
+    before giving up on that chunk. Returns the normalized
+    {"schemes": {...}, "not_found": [...]} shape for just this chunk."""
     codes_param = ",".join(scheme_codes)
-    resp = requests.get(TIGZIG_NAV_URL, params={"schemes": codes_param}, timeout=30)
-    resp.raise_for_status()
-    data = resp.json()
+    last_error = None
+
+    for attempt in range(1, MAX_RETRIES + 2):  # e.g. 1 initial try + 2 retries
+        try:
+            resp = requests.get(
+                TIGZIG_NAV_URL, params={"schemes": codes_param}, timeout=NAV_REQUEST_TIMEOUT
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            break
+        except requests.RequestException as exc:
+            last_error = exc
+            print(f"    attempt {attempt} failed for chunk {scheme_codes}: {exc}")
+    else:
+        print(f"    ! giving up on chunk {scheme_codes} after {MAX_RETRIES + 1} attempts: {last_error}")
+        return {"schemes": {}, "not_found": scheme_codes}
 
     if isinstance(data, dict) and "schemes" in data:
         schemes_raw = data["schemes"]
@@ -102,7 +132,6 @@ def fetch_batch_nav(scheme_codes: list[str]) -> dict:
         schemes_raw = data
         not_found = []
     else:
-        # Single-scheme-shaped response, even though we asked for a batch
         schemes_raw = [data]
         not_found = []
 
@@ -112,6 +141,26 @@ def fetch_batch_nav(scheme_codes: list[str]) -> dict:
         schemes_by_code = {str(item.get("scheme_code")): item for item in schemes_raw}
 
     return {"schemes": schemes_by_code, "not_found": not_found}
+
+
+def fetch_batch_nav(scheme_codes: list[str]) -> dict:
+    """Fetch NAV history for all scheme_codes, in small chunks rather
+    than one big request — fetching full multi-year history for 24 funds
+    in a single call timed out in practice against the free Tigzig API.
+    Merges all chunks into one {"schemes": {...}, "not_found": [...]}
+    result so the caller doesn't need to know chunking happened.
+    """
+    all_schemes: dict = {}
+    all_not_found: list = []
+
+    for i in range(0, len(scheme_codes), BATCH_CHUNK_SIZE):
+        chunk = scheme_codes[i : i + BATCH_CHUNK_SIZE]
+        print(f"  fetching chunk {i // BATCH_CHUNK_SIZE + 1}: {chunk}")
+        result = _fetch_one_chunk(chunk)
+        all_schemes.update(result["schemes"])
+        all_not_found.extend(result["not_found"])
+
+    return {"schemes": all_schemes, "not_found": all_not_found}
 
 
 def is_zero_or_invalid_nav(raw_nav) -> bool:
