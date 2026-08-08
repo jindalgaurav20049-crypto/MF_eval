@@ -714,6 +714,31 @@ logged here so it isn't forgotten or discovered as a surprise later.
   endpoints compute live on every request, which works for a demo but
   won't scale as a caching strategy
 
+### Addendum — caught our own bug by actually reading the response (same session)
+
+First live test of `/compare` returned `return_3y_cagr_pct`/`return_5y_cagr_pct`
+as `null` for both funds — a stub `None` left in `compare.py` that never
+got wired up, missed during the original build. Caught by reading the
+actual JSON response critically rather than just checking the request
+succeeded (status 200 isn't the same as "the response is correct" — the
+same lesson from Session 6's wrong-fund matches, applied one layer up).
+
+Fixed by reusing `trailing_window()` + `compute_metrics()` (already built
+for `funds.py`'s summary endpoint) inside `compare.py`'s `_build_slot()`.
+Also caught a second, related bug while fixing the first: `std_dev_3y`
+and `sharpe_3y` were named for a 3-year window but were being fed
+full-history values — an easy mistake since both existed as valid
+numbers, just the wrong ones for what the field name promised. Verified
+the fix with a live before/after comparison: 3Y-window Sharpe (0.41) vs.
+the full 13-year Sharpe (0.55) for the same fund — genuinely different
+numbers, confirming the fix changed the actual calculation, not just
+silenced a null.
+
+**Lesson:** a field returning a plausible-looking number is not the same
+as a field returning the *correct* number for what its name promises —
+worth checking field-by-field against what each name actually claims,
+not just "did every field get filled in."
+
 ## Roadmap (living — update as phases complete)
 
 - [x] **Phase A — Core NAV pipeline:** real NAV data for 24 curated
