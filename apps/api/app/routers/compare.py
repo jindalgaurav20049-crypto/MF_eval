@@ -1,75 +1,59 @@
-"""Compare endpoint — stub returning typed response."""
+"""
+Compare endpoint — real implementation, reusing app/services/fund_metrics.py
+(same computation used by funds.py's summary endpoint — one source of truth).
+"""
 
 from __future__ import annotations
 
 import structlog
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
 
-from app.models.schemas import (
-    AnalysisMode,
-    CompareResponse,
-    CompareSchemeSlot,
-)
+from app.db.base import get_db
+from app.db.models import Scheme
+from app.models.schemas import AnalysisMode, CompareResponse, CompareSchemeSlot
+from app.services.fund_metrics import compute_metrics, load_nav_series, simple_health_score
 
 router = APIRouter(prefix="/compare", tags=["compare"])
 logger = structlog.get_logger(__name__)
 
-_STUB_SLOTS: dict[str, CompareSchemeSlot] = {
-    "101206": CompareSchemeSlot(
-        scheme_id="101206",
-        scheme_name="Axis Bluechip Fund - Direct Plan Growth",
-        category="Large Cap",
-        expense_ratio_pct=0.45,
-        nav=54.32,
-        return_1y_pct=18.2,
-        return_3y_cagr_pct=12.4,
-        return_5y_cagr_pct=14.1,
-        std_dev_3y=14.2,
-        sharpe_3y=0.82,
-        max_drawdown_pct=-28.5,
-        fund_health_score=72.5,
-    ),
-    "119598": CompareSchemeSlot(
-        scheme_id="119598",
-        scheme_name="Mirae Asset Large Cap Fund - Direct Growth",
-        category="Large Cap",
-        expense_ratio_pct=0.52,
-        nav=102.15,
-        return_1y_pct=19.8,
-        return_3y_cagr_pct=13.1,
-        return_5y_cagr_pct=15.3,
-        std_dev_3y=13.8,
-        sharpe_3y=0.91,
-        max_drawdown_pct=-26.2,
-        fund_health_score=76.0,
-    ),
-    "120503": CompareSchemeSlot(
-        scheme_id="120503",
-        scheme_name="Parag Parikh Flexi Cap Fund - Direct Growth",
-        category="Flexi Cap",
-        expense_ratio_pct=0.61,
-        nav=76.88,
-        return_1y_pct=22.3,
-        return_3y_cagr_pct=15.6,
-        return_5y_cagr_pct=17.2,
-        std_dev_3y=12.1,
-        sharpe_3y=1.14,
-        max_drawdown_pct=-22.1,
-        fund_health_score=82.0,
-    ),
-}
+
+def _build_slot(db: Session, scheme: Scheme) -> CompareSchemeSlot:
+    series = load_nav_series(db, scheme.id)
+    full = compute_metrics(series)
+    health_score, _ = simple_health_score(full)
+    latest_nav = float(series[-1].nav) if series else None
+
+    return CompareSchemeSlot(
+        scheme_id=scheme.amfi_scheme_code,
+        scheme_name=scheme.scheme_name,
+        category=scheme.sebi_category or "Unknown",
+        expense_ratio_pct=None,  # not ingested yet
+        nav=latest_nav,
+        return_1y_pct=None,  # would need a distinct 1Y absolute-return calc, not CAGR
+        return_3y_cagr_pct=None,  # populated below via trailing windows if needed later
+        return_5y_cagr_pct=None,
+        std_dev_3y=full.std_dev_annualized_pct,
+        sharpe_3y=full.sharpe_ratio,
+        max_drawdown_pct=full.max_drawdown_pct,
+        fund_health_score=health_score,
+    )
 
 
 @router.get("", response_model=CompareResponse)
 async def compare_funds(
     scheme_ids: str = Query(..., description="Comma-separated scheme IDs (2–5 funds)"),
     mode: AnalysisMode = Query(AnalysisMode.BEGINNER),
+    db: Session = Depends(get_db),
 ) -> CompareResponse:
-    """Compare up to 5 mutual fund schemes side by side."""
+    """Compare up to 5 mutual fund schemes side by side — real DB query."""
     ids = [s.strip() for s in scheme_ids.split(",") if s.strip()]
     logger.info("compare_funds_requested", scheme_ids=ids, mode=mode)
 
-    slots = [_STUB_SLOTS[sid] for sid in ids if sid in _STUB_SLOTS]
+    schemes = db.query(Scheme).filter(Scheme.amfi_scheme_code.in_(ids)).all()
+    # Preserve the order the caller asked for, skip any ID that wasn't found
+    by_code = {s.amfi_scheme_code: s for s in schemes}
+    slots = [_build_slot(db, by_code[sid]) for sid in ids if sid in by_code]
 
     note = None
     if mode == AnalysisMode.BEGINNER and len(slots) > 2:

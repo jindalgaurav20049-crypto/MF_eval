@@ -642,14 +642,89 @@ pipeline reflects reality rather than hiding problems.
   checking `confirm_schemes.py`'s incremental-save behavior wasn't
   affected by the same class of issue.
 
+## Session 7 — API Wired to Real Data (Phase A Complete)
+
+**Date:** 2026-08-08
+
+### What we did
+Replaced all stub API responses with real database queries:
+- `/funds/search` — real `Scheme`/`AMC` query with `ilike` matching, live
+  latest-NAV lookup per result
+- `/funds/{id}/summary` — real CAGR/Sharpe/Drawdown computed live from
+  ingested NAV history, with proper 1Y/3Y/5Y trailing windows for
+  advanced mode (not just one full-history number)
+- `/compare` — same underlying computation, reused via a new shared
+  `app/services/fund_metrics.py` rather than duplicated per-endpoint
+- Fixed 3 existing tests that hardcoded fake placeholder scheme codes
+  (`101206`) — replaced with real confirmed codes from Session 6
+
+Verified live: `GET /funds/search?q=axis` returned 5 real Axis funds
+across 5 different categories with real current NAV values, straight
+from the database.
+
+### Concepts introduced this session
+
+**Trailing windows vs. full-history metrics are genuinely different
+things.** `demo_metrics.py` computes one CAGR/Sharpe/Drawdown per fund
+over its *entire* history (13+ years for most funds) — useful as an
+end-to-end pipeline proof, but not what "what's this fund's 1-year
+return" actually means. The real API's advanced summary slices the NAV
+series into proper 1Y/3Y/5Y trailing windows and computes each
+independently — the difference between a demo script and a real feature.
+
+**A dependency injection pattern for DB access (`Depends(get_db)`).**
+FastAPI's `Depends` mechanism opens a DB session per-request and
+guarantees it closes afterward (via `try/finally`) even if the request
+handler raises an exception. Without this, a bug in one request could
+leak an open DB connection that never gets cleaned up.
+
+**Flag gaps in code, don't hide them.** Several fields (expense ratio,
+AUM, benchmark comparison, sub-category) return `None` with an inline
+comment explaining exactly why ("not ingested yet") rather than a fake
+plausible-looking number. The health score is explicitly labeled a
+"deliberately simple placeholder, not a validated methodology" in its
+own docstring — anyone reading the code (including future us) knows
+immediately what's real and what's a stand-in.
+
+**A real, logged limitation: tests now depend on a live database.**
+The existing test suite hits the actual Postgres instance directly, no
+mocking or fixtures. Passes locally (DB is populated), but will **fail
+in CI** since GitHub Actions has no database at all. Correct proper fix
+(isolated test DB / fixtures) is real Phase B work, not done today —
+logged here so it isn't forgotten or discovered as a surprise later.
+
+### Interview questions to be able to answer out loud
+1. Why compute metrics over trailing windows (1Y/3Y/5Y) instead of one
+   full-history number — what does each serve that the other doesn't?
+2. Explain what `Depends(get_db)` actually does and why the
+   `try/finally` matters — what breaks without it?
+3. Why return `None` for a field you don't have data for, instead of a
+   reasonable-looking estimate? What's the cost of doing it the other way?
+4. Your test suite passes locally but would fail in CI — why, and what's
+   the actual fix (not just "add a database to CI")?
+
+### Known follow-ups (not blocking, logged so they aren't lost)
+- Fix HDFC and ICICI's Nifty 50 Index Fund entries (still wrong from
+  Session 6 — Equal Weight / Nifty 500 instead of plain Nifty 50)
+- Test suite needs isolated fixtures, not a dependency on the live dev DB
+- `analytics_engine` should re-export `cagr_from_nav_series` at its
+  top level (Session 6 finding, still open)
+- Worker (`apps/worker/app/tasks/metrics.py`) still doesn't persist
+  computed metrics into `computed_metric_snapshot` — summary/compare
+  endpoints compute live on every request, which works for a demo but
+  won't scale as a caching strategy
+
 ## Roadmap (living — update as phases complete)
 
-- [ ] **Phase A — Core NAV pipeline:** ingest real NAV data for the 24
-      curated funds, wire worker to compute real metrics and save them,
-      make API read from DB *(in progress)*
-- [ ] **Phase B — Make it correct:** handle short-history funds, missing
-      trading days, fund renames/mergers; add integration tests
-- [ ] **Phase C — Real user accounts:** users table, auth, watchlist/
+- [x] **Phase A — Core NAV pipeline:** real NAV data for 24 curated
+      funds ingested (73,587 rows), API reads from DB, real metrics
+      computed live via analytics_engine — **complete as of Session 7**
+- [ ] **Phase B — Make it correct:** isolated test fixtures (not a live
+      DB dependency), handle short-history funds, missing trading days,
+      persist worker-computed metrics into computed_metric_snapshot
+      instead of computing live every request
+- [ ] **Phase C — Real user accounts:** `app_user` table already exists
+      (corrected assumption from Session 6) — needs auth + watchlist/
       portfolio actually tied to logged-in users
 - [ ] **Phase D — Full India MF universe ingestion:** expand beyond the
       curated 24 to the full ~8,600 active schemes
