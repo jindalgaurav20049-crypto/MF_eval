@@ -582,14 +582,65 @@ for cheap re-runs earlier paid off immediately here.
 4. Why does making a pipeline idempotent (safe to re-run) matter beyond
    just "convenience" — how did it directly help recover from this bug?
 
-### Next session
-1. Wipe the dev DB (`docker-compose down -v` → `up -d` → `alembic upgrade
-   head`) — cheap, since it's local dev data.
-2. Re-run `lookup_schemes.py` to regenerate `resolved_schemes.json` with
-   the new `confirmed_scheme_code` field.
-3. Run `scripts/confirm_schemes.py` and actually confirm all 24 by hand.
-4. Re-run `ingest_nav_data.py` — now hard-gated, will refuse anything
-   unconfirmed.
+### Session 6 — Final Wrap (real data, confirmed, demoed)
+
+Finished the confirmation pass by hand: worked through all remaining
+entries applying the pattern learned across the session — **Growth
+option, Direct plan, exact category match**, skip anything IDCW/Bonus/
+Regular/Ultra/Next/500/Equal Weight/deactivated. Found one more real
+rename along the way: **Kotak Emerging Equity Fund → Kotak Midcap Fund**
+(confirmed via kotakmf.com, same ISIN throughout) — the 5th rename found
+this project, same industry-wide pattern each time.
+
+Also fixed a real bug in `lookup_schemes.py` itself: it originally
+overwrote the whole output file on every run, which would have silently
+wiped out confirmed answers if re-run to fix just one fund's search term.
+Now merges — carries forward anything already confirmed, only re-fetches
+what's still open.
+
+**Final result: 24/24 funds confirmed, 73,587 real NAV rows ingested.**
+PR #3 merged into `main`.
+
+**Built `scripts/demo_metrics.py`** — pulls every ingested fund's real NAV
+history and feeds it straight into the actual `analytics_engine` package
+(same tested CAGR/Sharpe/Drawdown code from Session 1, nothing
+reimplemented) to print a live comparison table. Caught one small real
+gap while wiring it up: `cagr_from_nav_series` exists in
+`analytics_engine.calculators.cagr` but was never re-exported at the
+package's top level (`__init__.py`) — worth adding as a small follow-up,
+since it's the more commonly useful entry point for callers who have a
+NAV series rather than a bare start/end pair.
+
+**The output passed a real sanity check**, not just "ran without
+crashing": Small Cap funds showed the highest CAGR (22-24%) *and* the
+deepest drawdowns (-34% to -48%) — exactly the risk/reward relationship
+real markets should produce. Debt Short Duration sat at the calm end
+(8% CAGR, 2-3% drawdown, Sharpe > 1.2). And the two known-wrong entries
+(HDFC "Equal Weight" instead of plain Nifty 50, ICICI "Nifty 500" instead
+of Nifty 50) stood out organically in the data itself — the ICICI one
+showed only 1.6 years of history and a negative Sharpe ratio, consistent
+with it being a newer, different fund than intended. The bug we already
+knew about confirmed itself through the data, which is a good sign the
+pipeline reflects reality rather than hiding problems.
+
+### Interview questions (final addendum)
+1. How do you sanity-check a data pipeline's output beyond "it ran
+   without errors" — what would make you trust (or distrust) the numbers?
+2. You found the same class of bug (wrong-fund matches) confirm itself
+   organically in downstream computed metrics — what does that tell you
+   about defense in depth in a data pipeline?
+3. Walk through the small cap vs. debt fund risk/reward pattern in this
+   data — why is that the expected relationship, and what would it mean
+   if you saw the opposite?
+
+### Known follow-ups (not blocking, logged so they aren't lost)
+- Fix HDFC and ICICI's Nifty 50 Index Fund entries (currently ingested as
+  Equal Weight and Nifty 500 respectively) — re-confirm and re-ingest
+  just those two.
+- Add `cagr_from_nav_series` to `analytics_engine`'s top-level exports.
+- lookup_schemes.py's file-overwrite bug is fixed, but worth double-
+  checking `confirm_schemes.py`'s incremental-save behavior wasn't
+  affected by the same class of issue.
 
 ## Roadmap (living — update as phases complete)
 
