@@ -12,10 +12,26 @@ from sqlalchemy.orm import Session
 from app.db.base import get_db
 from app.db.models import Scheme
 from app.models.schemas import AnalysisMode, CompareResponse, CompareSchemeSlot
-from app.services.fund_metrics import compute_metrics, load_nav_series, simple_health_score
+from app.services.fund_metrics import (
+    compute_metrics,
+    load_nav_series,
+    simple_health_score,
+    trailing_window,
+)
 
 router = APIRouter(prefix="/compare", tags=["compare"])
 logger = structlog.get_logger(__name__)
+
+
+def _absolute_return_pct(series, years: float) -> float | None:
+    """Simple absolute % change over a trailing window — different from
+    CAGR, which annualizes. For a 1Y window these are close but not
+    identical; for consistency with what "1Y return" means to most fund
+    websites, this uses plain absolute change, not CAGR."""
+    window = trailing_window(series, years)
+    if len(window) < 2:
+        return None
+    return (window[-1].nav / window[0].nav - 1) * 100
 
 
 def _build_slot(db: Session, scheme: Scheme) -> CompareSchemeSlot:
@@ -24,18 +40,24 @@ def _build_slot(db: Session, scheme: Scheme) -> CompareSchemeSlot:
     health_score, _ = simple_health_score(full)
     latest_nav = float(series[-1].nav) if series else None
 
+    metrics_3y = compute_metrics(trailing_window(series, 3))
+    metrics_5y = compute_metrics(trailing_window(series, 5))
+
     return CompareSchemeSlot(
         scheme_id=scheme.amfi_scheme_code,
         scheme_name=scheme.scheme_name,
         category=scheme.sebi_category or "Unknown",
         expense_ratio_pct=None,  # not ingested yet
         nav=latest_nav,
-        return_1y_pct=None,  # would need a distinct 1Y absolute-return calc, not CAGR
-        return_3y_cagr_pct=None,  # populated below via trailing windows if needed later
-        return_5y_cagr_pct=None,
-        std_dev_3y=full.std_dev_annualized_pct,
-        sharpe_3y=full.sharpe_ratio,
-        max_drawdown_pct=full.max_drawdown_pct,
+        return_1y_pct=_absolute_return_pct(series, 1),
+        return_3y_cagr_pct=metrics_3y.cagr_pct,
+        return_5y_cagr_pct=metrics_5y.cagr_pct,
+        # These fields are named "_3y" in the schema — use the 3Y window's
+        # values, not full-history (caught while fixing return_3y_cagr_pct
+        # above; same underlying oversight).
+        std_dev_3y=metrics_3y.std_dev_annualized_pct,
+        sharpe_3y=metrics_3y.sharpe_ratio,
+        max_drawdown_pct=full.max_drawdown_pct,  # this one IS meant to be full-history
         fund_health_score=health_score,
     )
 
