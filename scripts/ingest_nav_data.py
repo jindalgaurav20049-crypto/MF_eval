@@ -144,19 +144,33 @@ def _fetch_one_chunk(scheme_codes: list[str]) -> dict:
 
 
 def fetch_batch_nav(scheme_codes: list[str]) -> dict:
-    """Fetch NAV history for all scheme_codes, in small chunks rather
-    than one big request — fetching full multi-year history for 24 funds
-    in a single call timed out in practice against the free Tigzig API.
-    Merges all chunks into one {"schemes": {...}, "not_found": [...]}
-    result so the caller doesn't need to know chunking happened.
+    """Fetch NAV history for all scheme_codes.
+
+    Numeric AMFI codes go through the proven batch path (chunks of 6,
+    already working reliably). ISIN-based codes (starts with a letter,
+    e.g. "INF...") are fetched ONE AT A TIME instead — mixing an ISIN
+    into the same batch call as numeric codes hung indefinitely in
+    practice (session log: chunk 4 never returned). Isolating them means
+    a single slow/misbehaving identifier can't freeze the whole run, and
+    if one does fail, only that one fund is affected — everything else
+    still completes.
     """
+    numeric_codes = [c for c in scheme_codes if c.isdigit()]
+    isin_codes = [c for c in scheme_codes if not c.isdigit()]
+
     all_schemes: dict = {}
     all_not_found: list = []
 
-    for i in range(0, len(scheme_codes), BATCH_CHUNK_SIZE):
-        chunk = scheme_codes[i : i + BATCH_CHUNK_SIZE]
+    for i in range(0, len(numeric_codes), BATCH_CHUNK_SIZE):
+        chunk = numeric_codes[i : i + BATCH_CHUNK_SIZE]
         print(f"  fetching chunk {i // BATCH_CHUNK_SIZE + 1}: {chunk}")
         result = _fetch_one_chunk(chunk)
+        all_schemes.update(result["schemes"])
+        all_not_found.extend(result["not_found"])
+
+    for isin in isin_codes:
+        print(f"  fetching ISIN individually: {isin}")
+        result = _fetch_one_chunk([isin])
         all_schemes.update(result["schemes"])
         all_not_found.extend(result["not_found"])
 

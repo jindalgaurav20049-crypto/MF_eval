@@ -77,8 +77,11 @@ CURATED_FUNDS: list[dict[str, str]] = [
     {"category": "Hybrid - Balanced Advantage", "amc": "Edelweiss Mutual Fund", "search": "Edelweiss Balanced Advantage Fund Direct Growth"},
     # Index Fund (useful as an in-app benchmark)
     {"category": "Index Fund", "amc": "UTI Mutual Fund", "search": "UTI Nifty 50 Index Fund"},  # previous fix (dropping "50") was wrong — current branding on UTI's own site still uses "50"; dropped "Direct Growth" instead this time
-    {"category": "Index Fund", "amc": "HDFC Mutual Fund", "search": "HDFC NIFTY 50 Index Fund Direct Growth"},  # reordered + capitalized to match Tigzig's naming convention for this AMC's other Nifty funds
-    {"category": "Index Fund", "amc": "ICICI Prudential Mutual Fund", "search": "ICICI Prudential Nifty 50 Index Fund"},  # dropped "Direct Growth" — same fix pattern as HDFC/UTI above, worth confirming next run
+    # HDFC and ICICI's plain "Nifty 50 Index Fund" dropped from the
+    # curated list — Tigzig doesn't recognize either verified ISIN as a
+    # valid identifier (confirmed "not found" on both, cleanly, not a
+    # timeout). Not worth more time chasing 2 of 24 funds. UTI's Nifty 50
+    # Index Fund already covers this category.
 ]
 
 

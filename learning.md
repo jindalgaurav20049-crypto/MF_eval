@@ -739,23 +739,108 @@ as a field returning the *correct* number for what its name promises —
 worth checking field-by-field against what each name actually claims,
 not just "did every field get filled in."
 
+## Session 8 — Final Data Cleanup + Replanning
+
+**Date:** 2026-08-09
+
+### What we did
+Tried to fix the last 2 known-wrong funds (HDFC and ICICI's Nifty 50
+Index Fund, wrong since Session 6). This turned into real API
+archaeology, then a deliberate decision to stop.
+
+### What happened, in order
+1. Investigated expense ratio as a "quick win" — turned out AMFI's TER
+   page is a JS-driven form, not a flat file like NAVAll.txt. Genuinely
+   not a quick add; needs its own investigation session. Logged, not
+   pursued further today.
+2. For the 2 wrong funds: their real names didn't appear in Tigzig's
+   search results under any name-text variant tried. Found verified
+   ISINs from independent sources (HDFC: `INF179K01WM1`, ICICI:
+   `INF109K012M7`, each cross-confirmed via 3-4 sources).
+3. **Wrong assumption caught mid-stream:** first tried searching
+   `/mf/v1/search?q=<ISIN>` — got zero results. Tigzig's own docs
+   confirmed ISIN support exists, but only on `/mf/v1/nav`, not
+   `/search`. Search only ever matched fund-name text.
+4. Manually set `confirmed_scheme_code` to the ISINs directly (bypassing
+   search, since the ingestion script's actual NAV fetch supports ISIN
+   natively) — but mixing an ISIN into the same batch request as 5
+   numeric codes caused that request to hang indefinitely.
+5. **Fixed properly:** split ingestion so numeric codes still batch
+   together (proven, fast) but ISIN-based codes fetch individually,
+   isolated — so one identifier can't freeze the whole run.
+6. Re-ran cleanly — batch numeric funds correctly showed **"+1 row"**
+   each (not a bug: idempotency working exactly as designed, only
+   inserting the 1 new day since the last successful run). Both ISINs
+   came back "not found" — cleanly, not hanging.
+7. **Final decision: dropped both funds from the curated list.** Per
+   Tigzig's own troubleshooting docs, a clean "not found" on a verified
+   ISIN usually means it's the wrong fund *variant*, not a wrong code.
+   Chasing 2 of 24 funds further wasn't worth more time — 22 real,
+   correctly verified funds across 8 categories is a solid dataset.
+   **Phase A is now genuinely, finally complete at 22 funds.**
+
+### Concepts introduced this session
+
+**Not every API "supports X" claim applies to every endpoint of that
+API.** Tigzig's docs said "ISIN codes are fully supported" — true, but
+only for `/nav`, not `/search`. A capability described for an API
+doesn't automatically transfer to every endpoint in it; check which
+specific endpoint the claim is about.
+
+**Isolating unusual inputs prevents one edge case from breaking
+everything else.** Mixing a rarely-used identifier format (ISIN) into a
+batch request that otherwise only ever saw numeric codes was the kind of
+untested combination that's easy to introduce without noticing. The fix
+wasn't "add a longer timeout" — it was structural: never let an
+unusual case share a request with the proven common case.
+
+**Knowing when to stop is a real engineering skill, not a failure.**
+Two funds out of 24 (8%) consumed a disproportionate amount of time.
+Recognizing that and cutting losses — rather than continuing to
+"just try one more thing" — is itself something worth being able to
+talk about: scoping decisions aren't just made at the start of a
+project, they get made continuously.
+
+### Interview questions to be able to answer out loud
+1. You found conflicting information about whether an API feature was
+   supported — how did you resolve it, and what did you learn about
+   trusting documentation at face value?
+2. Describe a time you decided to stop debugging something and move on
+   — what made you decide that, and how did you make sure it wasn't
+   forgotten?
+3. Why does isolating an unusual input from a batch of normal inputs
+   improve reliability, even if it makes the code slightly more complex?
+
+### Replanning — frontend and multi-user prioritized next
+
+Full vision is roughly a third complete. Re-sequenced from the original
+A→B→C→D order to match what's actually wanted next: real frontend and
+real multi-user accounts, ahead of full-universe ingestion or the
+recommendation engine — those need a working, demoable product to plug
+into first.
+
 ## Roadmap (living — update as phases complete)
 
-- [x] **Phase A — Core NAV pipeline:** real NAV data for 24 curated
-      funds ingested (73,587 rows), API reads from DB, real metrics
-      computed live via analytics_engine — **complete as of Session 7**
+- [x] **Phase A — Core NAV pipeline:** 22 real, verified funds ingested
+      across 8 categories, API reads from DB, real metrics computed live
+      via analytics_engine — **complete as of Session 8**
+- [ ] **Phase F — Frontend build-out** *(prioritized next)*: wire the
+      existing React Native screens to the real `/funds/search`,
+      `/summary`, `/compare` endpoints; real design system, not stub UI
+- [ ] **Phase C — Multi-user + auth** *(prioritized next)*: `app_user`
+      table already exists — needs real login/session handling,
+      watchlist/portfolio actually tied to logged-in users
 - [ ] **Phase B — Make it correct:** isolated test fixtures (not a live
       DB dependency), handle short-history funds, missing trading days,
       persist worker-computed metrics into computed_metric_snapshot
       instead of computing live every request
-- [ ] **Phase C — Real user accounts:** `app_user` table already exists
-      (corrected assumption from Session 6) — needs auth + watchlist/
-      portfolio actually tied to logged-in users
 - [ ] **Phase D — Full India MF universe ingestion:** expand beyond the
-      curated 24 to the full ~8,600 active schemes
-- [ ] **Phase E — Recommendation + comparison engine**
-- [ ] **Phase F — Frontend design system + real UI build-out**
+      curated 22 to the full ~8,600 active schemes
+- [ ] **Phase E — Recommendation + comparison engine** — good candidate
+      for Gaurav to lead the product-thinking side of
 - [ ] **Phase G — Deployment**
 - [ ] **Backlog — Holdings/composition data + overlap detector:**
-      deliberately deprioritized (see Session 5) — revisit once the core
-      product is solid
+      deliberately deprioritized (see Session 5); Tigzig's "Composition"
+      tool (found Session 8) is a likely real data source when revisited
+- [ ] **Backlog — Expense ratio data:** AMFI's TER page is a JS form, not
+      a flat file — needs its own investigation session (Session 8)
