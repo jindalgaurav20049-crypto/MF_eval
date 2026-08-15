@@ -819,14 +819,89 @@ real multi-user accounts, ahead of full-universe ingestion or the
 recommendation engine — those need a working, demoable product to plug
 into first.
 
+## Session 9 — Frontend Wired to Real Data (Phase F Complete)
+
+**Date:** 2026-08-15
+
+### What we did
+Discovered Home/Explore/Profile screens were already genuinely wired to
+the real API from earlier work — the real gaps were a missing Fund
+Detail screen and a placeholder Compare screen. Built both:
+- Added real TypeScript interfaces (`BeginnerSummary`, `AdvancedSummary`,
+  `CompareResponse`, etc.) matching the API's Pydantic schemas exactly —
+  replaced `unknown` types that gave zero safety
+- Built `FundDetailScreen.tsx` — real health score, verdict, and metrics,
+  rendering differently for beginner vs. advanced mode
+- Rebuilt `CompareScreen.tsx` — real fund search, add/remove selection,
+  calls the actual `/compare` endpoint
+- Restructured navigation so Explore is a stack (list → detail) instead
+  of a flat tab, so tapping a search result actually goes somewhere
+- Fixed 2 real bugs caught while building: `compare.py`'s `std_dev_3y`/
+  `sharpe_3y` fields were fed full-history values instead of the 3-year
+  window their names promised; a stray `unknown` type masked a missing
+  field mapping
+
+### The debugging trail (all real environment issues, not code bugs)
+1. `EMFILE: too many open files` — macOS's file watcher limit hit by
+   Metro; fixed with Watchman (the standard tool for this)
+2. Favicon/icon crash — `app.json` referenced image files that were
+   never created; generated placeholders
+3. VSCode showing "cannot find module 'react'" everywhere — turned out
+   to be a stray duplicate `src/` folder sitting at the repo root
+   (outside `apps/mobile`), confusing the TypeScript checker; deleted
+4. `500 Internal Server Error` on `/funds/search?q=hdfc` — traced via
+   the actual server traceback (not guessed) to Postgres not running —
+   same root cause as an earlier session, now a recognized pattern
+
+**The pattern worth naming:** every one of these looked alarming on
+first read (stack traces, red errors, "fetches none of the schemes") but
+each had a boring, specific cause once actually investigated — wrong
+directory, missing file, stale duplicate, service not running. None
+were bugs in the code we wrote this session.
+
+### Verified live
+Screenshot evidence: Explore search for "hdfc" returned all 4 real HDFC
+funds with real NAV values. Compare screen showed HDFC Nifty50 Equal
+Weight vs. Axis ELSS Tax Saver side by side — genuinely different
+1Y/3Y/5Y returns, Sharpe ratios (0.62 vs 0.49), drawdowns (-18% vs
+-33.5%), and health scores (43 vs 48) for each fund. **First time the
+actual app UI — not curl, not a demo script — showed real computed data
+end to end.**
+
+### Concepts introduced this session
+
+**A 500 error's real cause lives in the server terminal, not the browser.**
+The browser only ever shows a generic "Internal Server Error" — the
+actual Python traceback with the real exception type and line number is
+printed wherever `uvicorn` is running. Always go there first instead of
+guessing from the client side.
+
+**Isolating suspects one at a time beats guessing at everything.**
+Rather than assuming the frontend broke, we tested the backend URL
+directly in a browser first — separating "is this a data/backend
+problem" from "is this a frontend problem" before touching any code.
+
+**A duplicate/stray file can shadow the real one for tooling.**
+VSCode's TypeScript checker was reading a leftover copy of files outside
+the actual project folder, producing errors that had nothing to do with
+the real, working code sitting in the right place.
+
+### Interview questions to be able to answer out loud
+1. A browser shows "Internal Server Error" with no detail — where do you
+   actually look, and why does the browser not show you more?
+2. Walk through how you isolated whether a bug was in the frontend or
+   backend, rather than guessing at both simultaneously.
+3. Why might a code editor show import errors for a project that
+   actually type-checks and runs fine from the terminal?
+
 ## Roadmap (living — update as phases complete)
 
 - [x] **Phase A — Core NAV pipeline:** 22 real, verified funds ingested
       across 8 categories, API reads from DB, real metrics computed live
       via analytics_engine — **complete as of Session 8**
-- [ ] **Phase F — Frontend build-out** *(prioritized next)*: wire the
-      existing React Native screens to the real `/funds/search`,
-      `/summary`, `/compare` endpoints; real design system, not stub UI
+- [x] **Phase F — Frontend build-out:** Explore search, Fund Detail, and
+      Compare all verified live against real data — **complete as of
+      Session 9**
 - [ ] **Phase C — Multi-user + auth** *(prioritized next)*: `app_user`
       table already exists — needs real login/session handling,
       watchlist/portfolio actually tied to logged-in users

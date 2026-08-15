@@ -8,12 +8,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { api, FundSearchResult } from "../api/client";
 import { useModeStore } from "../store/modeStore";
 import { colors } from "../theme/colors";
+import type { ExploreStackParamList } from "../navigation/RootNavigator";
 
-export function ExploreScreen() {
+type Props = NativeStackScreenProps<ExploreStackParamList, "ExploreList">;
+
+export function ExploreScreen({ navigation }: Props) {
   const mode = useModeStore((s) => s.mode);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<FundSearchResult[]>([]);
@@ -64,7 +68,15 @@ export function ExploreScreen() {
         keyExtractor={(item) => item.scheme_id}
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() =>
+              navigation.navigate("FundDetail", {
+                schemeId: item.scheme_id,
+                schemeName: item.scheme_name,
+              })
+            }
+          >
             <Text style={styles.fundName}>{item.scheme_name}</Text>
             <Text style={styles.meta}>
               {item.amc_name} · {item.sub_category}
@@ -79,7 +91,7 @@ export function ExploreScreen() {
                 </Text>
               )}
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
     </View>
